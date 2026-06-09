@@ -99,6 +99,23 @@ nav {
 .nav-links a:hover { opacity: 1; }
 .nav-links a:hover::after { width: 100%; }
 
+/* hamburger toggle — desktop hidden */
+.nav-toggle {
+  display: none;
+  width: 30px; height: 18px;
+  position: relative;
+  background: none; border: none; padding: 0; cursor: pointer;
+}
+.nav-toggle span {
+  position: absolute; left: 0; right: 0; height: 2px;
+  background: currentColor;
+  transition: transform 0.35s var(--ease), opacity 0.25s ease;
+}
+.nav-toggle span:nth-child(1) { top: 3px; }
+.nav-toggle span:nth-child(2) { bottom: 3px; }
+body.menu-open .nav-toggle span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+body.menu-open .nav-toggle span:nth-child(2) { transform: translateY(-6px) rotate(-45deg); }
+
 /* ─── Hero ──────────────────────────────────────────────────────────────── */
 .hero {
   position: relative;
@@ -620,10 +637,33 @@ body.has-cursor .work-item img { cursor: none; }
   .overlay-fields { grid-template-columns: 1fr 1fr; }
   .overlay-gallery { grid-template-columns: 1fr; }
 
-  nav { padding: 18px 24px; }
-  .nav-links { gap: 22px; }
-  .hero-content, .hero-meta-top { padding-left: 24px; padding-right: 24px; }
-  .hero-meta-top { left: 24px; right: 24px; }
+  /* Nav → hamburger + full-screen menu */
+  nav { padding: 18px 22px; }
+  .nav-logo { white-space: nowrap; font-size: 11px; position: relative; z-index: 2; }
+  .nav-toggle { display: block; position: relative; z-index: 2; }
+
+  .nav-links {
+    position: fixed; inset: 0; z-index: 1;
+    flex-direction: column; align-items: center; justify-content: center;
+    gap: 30px;
+    background: var(--bg);
+    transform: translateY(-100%);
+    opacity: 0;
+    transition: transform 0.5s var(--ease), opacity 0.4s ease;
+  }
+  .nav-links a { font-size: 18px; letter-spacing: 0.18em; opacity: 1; }
+  .nav-links a::after { bottom: -6px; }
+
+  body.menu-open nav { mix-blend-mode: normal; color: var(--fg); }
+  body.menu-open .nav-links { transform: translateY(0); opacity: 1; }
+  body.menu-open { overflow: hidden; }
+
+  /* Hero — fit the wordmark, calm the top */
+  .hero-content { padding: 24px; }
+  .hero-meta-top { display: none; }
+  .hero-title { font-size: clamp(42px, 15.5vw, 76px); letter-spacing: 0; line-height: 0.86; }
+  .hero-quote { max-width: none; }
+  .hero-desc { font-size: 15px; }
 }
 
 /* ─── Works head right (book trigger) ───────────────────────────────────── */

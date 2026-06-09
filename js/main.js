@@ -486,6 +486,19 @@ document.addEventListener("DOMContentLoaded", () => {
   observeReveal();
   initGalleryCursor();
 
+  // Mobile menu toggle
+  const navToggle = document.getElementById("nav-toggle");
+  const navLinks = document.getElementById("nav-links");
+  const closeMenu = () => {
+    document.body.classList.remove("menu-open");
+    navToggle.setAttribute("aria-expanded", "false");
+  };
+  navToggle.addEventListener("click", () => {
+    const open = document.body.classList.toggle("menu-open");
+    navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+  navLinks.addEventListener("click", (e) => { if (e.target.closest("a")) closeMenu(); });
+
   // Book triggers
   document.getElementById("open-book").addEventListener("click", openBook);
   document.getElementById("nav-book").addEventListener("click", (e) => { e.preventDefault(); openBook(); });

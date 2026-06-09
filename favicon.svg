@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Ruben Van Ruysseveldt">
+  <rect width="64" height="64" rx="11" fill="#0B0B0C"/>
+  <!-- film-frame border -->
+  <rect x="6.5" y="6.5" width="51" height="51" rx="6" fill="none"
+        stroke="#F4F3EF" stroke-opacity="0.22" stroke-width="2"/>
+  <!-- monogram -->
+  <g transform="translate(32 35) scale(0.84 1)">
+    <text x="0" y="0" text-anchor="middle" dominant-baseline="central"
+          font-family="Arial, Helvetica, sans-serif" font-weight="800"
+          font-size="27" letter-spacing="-1.5" fill="#F4F3EF">RVR</text>
+  </g>
+</svg>
