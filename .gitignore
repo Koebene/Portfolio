@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Vercel
+.vercel/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+
+# Local tooling (not needed for the live site)
+.claude/

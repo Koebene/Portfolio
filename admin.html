@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photo Admin — Ruben Van Ruysseveldt</title>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#0f0f10;--panel:#17171a;--line:#2a2a2e;--fg:#f4f3ef;--muted:#8a8a86;--accent:#c8502d;--ok:#4caf7d}
+    body{background:var(--bg);color:var(--fg);font-family:'Inter',sans-serif;font-size:14px;line-height:1.5;padding-bottom:80px}
+    a{color:inherit}
+    .display{font-family:'Anton',sans-serif;text-transform:uppercase;letter-spacing:.01em}
+
+    /* Top bar */
+    header{position:sticky;top:0;z-index:20;background:rgba(15,15,16,.95);backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;
+      gap:16px;padding:16px 24px;flex-wrap:wrap}
+    header h1{font-family:'Anton',sans-serif;text-transform:uppercase;font-size:22px;letter-spacing:.02em}
+    header .sub{font-size:11px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase}
+    .bar-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    button,.btn{font-family:inherit;font-size:12px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;
+      border:1px solid var(--line);background:var(--panel);color:var(--fg);padding:10px 16px;border-radius:2px;
+      transition:background .2s,border-color .2s,opacity .2s}
+    button:hover,.btn:hover{background:#222}
+    .btn-primary{background:var(--fg);color:#111;border-color:var(--fg)}
+    .btn-primary:hover{opacity:.85;background:var(--fg)}
+    .btn-danger{border-color:#5a2a22;color:#e8927e}
+    .btn-danger:hover{background:#3a1f1a}
+    #saved{font-size:11px;color:var(--ok);letter-spacing:.1em;opacity:0;transition:opacity .3s}
+    #saved.show{opacity:1}
+
+    .note{max-width:1100px;margin:18px auto 0;padding:0 24px;color:var(--muted);font-size:12.5px;line-height:1.7}
+    .note b{color:var(--fg)}
+
+    main{max-width:1100px;margin:0 auto;padding:24px}
+    .coll{margin-top:34px}
+    .coll-head{display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px solid var(--line);
+      padding-bottom:12px;margin-bottom:18px}
+    .coll-head .display{font-size:30px}
+    .coll-head .count{font-size:11px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase}
+
+    .card{display:grid;grid-template-columns:160px 1fr;gap:18px;background:var(--panel);border:1px solid var(--line);
+      border-radius:4px;padding:16px;margin-bottom:14px}
+    .thumb{position:relative;width:160px;height:200px;background:#000;border:1px solid var(--line);overflow:hidden;border-radius:2px}
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+    .thumb .empty{display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:11px;text-align:center;padding:10px}
+    .thumb .num{position:absolute;top:6px;left:8px;font-size:11px;color:#fff;text-shadow:0 1px 2px #000}
+    .filepick{margin-top:8px}
+    .filepick label{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+      border:1px dashed var(--line);text-align:center;padding:8px;border-radius:2px;cursor:pointer}
+    .filepick label:hover{border-color:var(--fg);color:var(--fg)}
+    .filepick input{display:none}
+
+    .fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .field{display:flex;flex-direction:column;gap:4px}
+    .field.full{grid-column:1 / -1}
+    .field label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+    .field input,.field textarea{background:#0c0c0d;border:1px solid var(--line);color:var(--fg);
+      font-family:inherit;font-size:13px;padding:9px 10px;border-radius:2px;resize:vertical;width:100%}
+    .field input:focus,.field textarea:focus{outline:none;border-color:var(--fg)}
+    .field .hint{font-size:10px;color:var(--muted)}
+    .title-input{font-family:'Anton',sans-serif!important;text-transform:uppercase;letter-spacing:.02em;font-size:18px!important}
+
+    .card-actions{grid-column:1 / -1;display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:12px;margin-top:4px}
+    .card-actions .spacer{flex:1}
+    .src-label{font-size:11px;color:var(--muted);align-self:center;margin-right:auto}
+    .add-row{margin-top:6px}
+    @media(max-width:680px){.card{grid-template-columns:1fr}.thumb{width:100%;height:240px}.fields{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Photo Admin</h1>
+      <div class="sub">Ruben Van Ruysseveldt — portfolio</div>
+    </div>
+    <div class="bar-actions">
+      <span id="saved">Preview saved ✓</span>
+      <a class="btn" href="index.html" target="_blank">Open site ↗</a>
+      <button id="reset" class="btn-danger" title="Discard browser preview and reload from photos.js">Reset to file</button>
+      <button id="export" class="btn-primary">Export photos.js ↓</button>
+    </div>
+  </header>
+
+  <div class="note">
+    Edits here save to <b>this browser</b> instantly — open the site to see them live. To make changes
+    <b>permanent</b> (and visible to everyone), click <b>Export photos.js</b> and replace
+    <b>js/photos.js</b> with the downloaded file. When you add a photo, also copy its image file into the
+    <b>images</b> folder (same filename you picked).
+  </div>
+
+  <main id="app"></main>
+
+  <script src="js/photos.js"></script>
+  <script>
+    const KEY = "rvr_photos_override";
+    const FIELDS = ["mono", "color"];
+
+    // ---- load working state (browser preview if present, else the file) ----
+    function clone(o){ return JSON.parse(JSON.stringify(o)); }
+    function freshFromFile(){ return clone(window.collections); }
+    let state;
+    try {
+      const raw = localStorage.getItem(KEY);
+      state = raw ? JSON.parse(raw) : freshFromFile();
+      if (!state || !state.mono || !state.color) state = freshFromFile();
+    } catch(e){ state = freshFromFile(); }
+
+    const app = document.getElementById("app");
+    const savedTag = document.getElementById("saved");
+    let savedTimer;
+
+    function exportState(){
+      const out = {};
+      for (const k of FIELDS){
+        out[k] = {
+          name: state[k].name,
+          sub:  state[k].sub,
+          photos: state[k].photos.map(p => ({
+            title: p.title || "", src: p.src || "", date: p.date || "",
+            cat: p.cat || "", loc: p.loc || "", ar: Number(p.ar) || 1, desc: p.desc || ""
+          }))
+        };
+      }
+      return out;
+    }
+
+    function save(){
+      localStorage.setItem(KEY, JSON.stringify(exportState()));
+      savedTag.classList.add("show");
+      clearTimeout(savedTimer);
+      savedTimer = setTimeout(()=>savedTag.classList.remove("show"), 1400);
+    }
+
+    function esc(html){ return String(html).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+    function photoCard(coll, p, i, total){
+      const thumbSrc = p._preview || p.src;
+      const thumb = thumbSrc
+        ? `<img src="${esc(thumbSrc)}" alt="">`
+        : `<div class="empty">No image yet —<br>pick a file below</div>`;
+      const other = coll === "mono" ? "color" : "mono";
+      const otherName = state[other].name;
+      return `
+      <div class="card" data-coll="${coll}" data-idx="${i}">
+        <div>
+          <div class="thumb"><span class="num">${String(i+1).padStart(2,"0")}</span>${thumb}</div>
+          <div class="filepick">
+            <label>Change image
+              <input type="file" accept="image/*" data-file="1">
+            </label>
+          </div>
+        </div>
+        <div class="fields">
+          <div class="field full">
+            <label>Title <span class="hint">— use a new line to split it</span></label>
+            <textarea class="title-input" rows="2" data-field="title">${esc(p.title||"")}</textarea>
+          </div>
+          <div class="field"><label>Date</label><input data-field="date" value="${esc(p.date||"")}"></div>
+          <div class="field"><label>Category</label><input data-field="cat" value="${esc(p.cat||"")}"></div>
+          <div class="field"><label>Location</label><input data-field="loc" value="${esc(p.loc||"")}"></div>
+          <div class="field"><label>Aspect ratio <span class="hint">(w÷h · auto-set on upload)</span></label><input type="number" step="0.01" min="0.1" data-field="ar" value="${Number(p.ar)||1}"></div>
+          <div class="field full"><label>Description</label><textarea rows="3" data-field="desc">${esc(p.desc||"")}</textarea></div>
+          <div class="card-actions">
+            <span class="src-label">${p.src ? esc(p.src) : "no file set"}</span>
+            <button data-action="up" ${i===0?"disabled":""}>↑</button>
+            <button data-action="down" ${i===total-1?"disabled":""}>↓</button>
+            <button data-action="move">→ ${esc(otherName)}</button>
+            <button data-action="del" class="btn-danger">Delete</button>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function render(){
+      app.innerHTML = FIELDS.map(coll => {
+        const c = state[coll];
+        const cards = c.photos.map((p,i)=>photoCard(coll,p,i,c.photos.length)).join("");
+        return `
+        <section class="coll" data-coll="${coll}">
+          <div class="coll-head">
+            <span class="display">${esc(c.name)}</span>
+            <span class="count">${c.photos.length} photos</span>
+          </div>
+          ${cards}
+          <div class="add-row"><button data-action="add" data-coll="${coll}">+ Add photo to ${esc(c.name)}</button></div>
+        </section>`;
+      }).join("");
+    }
+
+    // ---- helpers to locate a card's photo ----
+    function cardCtx(el){
+      const card = el.closest(".card");
+      if (!card) return null;
+      return { coll: card.dataset.coll, idx: +card.dataset.idx };
+    }
+
+    // ---- live field editing ----
+    app.addEventListener("input", (e)=>{
+      const f = e.target.dataset.field;
+      if (!f) return;
+      const ctx = cardCtx(e.target);
+      if (!ctx) return;
+      let v = e.target.value;
+      if (f === "ar") v = parseFloat(v) || 1;
+      state[ctx.coll].photos[ctx.idx][f] = v;
+      // keep the src label in sync if needed (no), just save
+      save();
+    });
+
+    // ---- file selection: set src + auto aspect ratio + preview ----
+    app.addEventListener("change", (e)=>{
+      if (!e.target.dataset.file) return;
+      const file = e.target.files[0];
+      const ctx = cardCtx(e.target);
+      if (!file || !ctx) return;
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = ()=>{
+        const p = state[ctx.coll].photos[ctx.idx];
+        p.src = "images/" + file.name;
+        p.ar = +(img.naturalWidth / img.naturalHeight).toFixed(2);
+        p._preview = url;          // session-only preview (not exported)
+        save();
+        render();
+      };
+      img.src = url;
+    });
+
+    // ---- buttons ----
+    app.addEventListener("click", (e)=>{
+      const btn = e.target.closest("button[data-action]");
+      if (!btn) return;
+      const action = btn.dataset.action;
+
+      if (action === "add"){
+        const coll = btn.dataset.coll;
+        state[coll].photos.push({ title:"NEW\nPHOTO", src:"", date:"", cat:"", loc:"", ar:1, desc:"" });
+        save(); render();
+        return;
+      }
+
+      const ctx = cardCtx(btn);
+      if (!ctx) return;
+      const arr = state[ctx.coll].photos;
+
+      if (action === "del"){
+        if (confirm("Delete this photo from the portfolio?")){ arr.splice(ctx.idx,1); save(); render(); }
+      } else if (action === "up" && ctx.idx > 0){
+        [arr[ctx.idx-1], arr[ctx.idx]] = [arr[ctx.idx], arr[ctx.idx-1]]; save(); render();
+      } else if (action === "down" && ctx.idx < arr.length-1){
+        [arr[ctx.idx+1], arr[ctx.idx]] = [arr[ctx.idx], arr[ctx.idx+1]]; save(); render();
+      } else if (action === "move"){
+        const other = ctx.coll === "mono" ? "color" : "mono";
+        const [p] = arr.splice(ctx.idx,1);
+        state[other].photos.push(p);
+        save(); render();
+      }
+    });
+
+    // ---- export photos.js ----
+    function serialize(){
+      const q = (s)=>JSON.stringify(s ?? "");
+      const photoBlock = (p)=>`      {
+        title: ${q(p.title)},
+        src:   ${q(p.src)},
+        date:  ${q(p.date)},
+        cat:   ${q(p.cat)},
+        loc:   ${q(p.loc)},
+        ar:    ${Number(p.ar)||1},
+        desc:  ${q(p.desc)},
+      },`;
+      const collBlock = (key,label)=>{
+        const c = state[key];
+        return `  // ─────────────  ${label}  ─────────────
+  ${key}: {
+    name: ${q(c.name)},
+    sub: ${q(c.sub)},
+    photos: [
+
+${c.photos.map(photoBlock).join("\n")}
+
+    ],
+  },`;
+      };
+      return `/* ============================================================================
+   PHOTO DATABASE  —  exported from the admin panel (admin.html).
+   You can keep editing here by hand, or keep using the admin panel.
+   Fields: title (\\n splits the line), src, date, cat, loc, ar (w/h), desc.
+   ============================================================================ */
+
+window.collections = {
+
+${collBlock("mono","BLACK & WHITE")}
+
+${collBlock("color","COLOUR")}
+
+};
+`;
+    }
+
+    document.getElementById("export").addEventListener("click", ()=>{
+      const blob = new Blob([serialize()], {type:"text/javascript"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "photos.js";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+    });
+
+    document.getElementById("reset").addEventListener("click", ()=>{
+      if (confirm("Discard the browser preview and reload from photos.js?\n(Your saved file is not affected.)")){
+        localStorage.removeItem(KEY);
+        state = freshFromFile();
+        render();
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>

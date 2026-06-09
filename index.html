@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ruben Van Ruysseveldt — Photography</title>
+  <meta name="description" content="A personal photography portfolio by Ruben Van Ruysseveldt — film and digital work in black & white and colour, made in Belgium for the love of it.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ─── Intro ───────────────────────────────────────────────────────── -->
+  <div id="intro">
+    <div class="intro-inner">
+      <span class="intro-name">Ruben Van Ruysseveldt</span>
+      <span class="intro-line"></span>
+      <span class="intro-sub">Photography — Belgium</span>
+    </div>
+  </div>
+  <script>
+    /* Play the intro only once per browsing session (no flash on revisits). */
+    (function () {
+      try {
+        if (sessionStorage.getItem("rvr_intro")) {
+          document.getElementById("intro").classList.add("skip");
+        } else {
+          sessionStorage.setItem("rvr_intro", "1");
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- ─── Nav ─────────────────────────────────────────────────────────── -->
+  <nav>
+    <span class="nav-logo">Ruben Van Ruysseveldt</span>
+    <ul class="nav-links">
+      <li><a href="#work">Work</a></li>
+      <li><a href="#" id="nav-book">Book</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- ─── Hero ─────────────────────────────────────────────────────────── -->
+  <header class="hero">
+    <div class="hero-img">
+      <img src="images/hero.jpeg" alt="Featured photograph — black & white portrait">
+    </div>
+    <div class="hero-meta-top">
+      <span>Photographer — Visual Artist</span>
+      <span>Portfolio / 2021 — 2025</span>
+    </div>
+    <div class="hero-content">
+      <h1 class="hero-title">PHOTO<span class="thin">GRAPHY</span></h1>
+      <div class="hero-bottom">
+        <div class="hero-quote">
+          <p class="hero-desc">
+            Every photograph is a small rebellion against time. While the world
+            insists on rushing forward, the image stays &mdash; a held breath, a
+            moment that refuses to disappear. In that stillness I learn to feel
+            more deliberately, and to see what the speed of living so often hides.
+          </p>
+          <cite class="hero-cite">&mdash; Ruben Van Ruysseveldt</cite>
+        </div>
+        <div class="hero-scroll">
+          <span>Scroll</span>
+          <span class="line"></span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ─── Collections ──────────────────────────────────────────────────── -->
+  <section class="collections" id="work">
+    <div class="switch">
+      <button class="switch-btn active" data-key="mono">
+        <span class="dot"></span>
+        <span class="switch-index">01 — Collection</span>
+        <span class="switch-name">Monochrome</span>
+        <span class="switch-sub">Black &amp; white — light, form &amp; stillness</span>
+      </button>
+      <button class="switch-btn" data-key="color">
+        <span class="dot"></span>
+        <span class="switch-index">02 — Collection</span>
+        <span class="switch-name">Chroma</span>
+        <span class="switch-sub">Colour — saturated, warm &amp; alive</span>
+      </button>
+    </div>
+
+    <div class="works-head">
+      <span class="label">Selected Work</span>
+      <div class="works-head-right">
+        <button class="book-trigger" id="open-book">View as Book ↗</button>
+        <span class="label works-count">— Projects</span>
+      </div>
+    </div>
+
+    <div class="works"><!-- populated by JS --></div>
+  </section>
+
+  <!-- ─── About ─────────────────────────────────────────────────────────── -->
+  <section class="about reveal" id="about">
+    <div class="about-text">
+      <h2 class="about-heading">About<br>The Work</h2>
+      <p class="about-body">
+        I&rsquo;m Ruben Van Ruysseveldt, a photographer based in Belgium. This is
+        a personal space &mdash; built to share my work with myself and with the
+        people I meet along the way. Nothing commercial; just a love of
+        photography in all its forms.
+      </p>
+      <p class="about-body">
+        Lately I&rsquo;m drawn most to film. There&rsquo;s something about it that
+        holds an emotion you can&rsquo;t fake &mdash; entirely in the moment. It
+        asks you to step into the scene yourself, and in doing so it changes how
+        you experience life: a slower, sharper, different way of looking at the
+        world.
+      </p>
+      <div class="about-detail">
+        <div><div class="label">Discipline</div><div class="about-detail-value">Film Photography</div></div>
+        <div><div class="label">Based in</div><div class="about-detail-value">Belgium</div></div>
+        <div><div class="label">Approach</div><div class="about-detail-value">Personal &amp; non-commercial</div></div>
+        <div><div class="label">Born</div><div class="about-detail-value">June 1992</div></div>
+      </div>
+    </div>
+    <div class="about-image">
+      <img src="images/about-portrait.jpeg" alt="Ruben Van Ruysseveldt — self-portrait">
+    </div>
+  </section>
+
+  <!-- ─── Contact ─────────────────────────────────────────────────────────── -->
+  <section class="contact reveal" id="contact">
+    <div class="contact-left">
+      <h2 class="contact-heading">Say<br>Hello</h2>
+      <p class="contact-sub">This isn&rsquo;t a shop window &mdash; just a place to share what I see. If something here resonates, find me on Instagram.</p>
+      <a class="contact-email" href="https://www.instagram.com/rubenvanruysseveldt/" target="_blank" rel="noopener">@rubenvanruysseveldt</a>
+    </div>
+    <div class="contact-right">
+      <div class="contact-socials">
+        <a href="https://www.instagram.com/rubenvanruysseveldt/" target="_blank" rel="noopener">Instagram</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Footer ─────────────────────────────────────────────────────────── -->
+  <footer>
+    <span class="footer-copy">© 2025 Ruben Van Ruysseveldt</span>
+    <span class="footer-right">Film &amp; Digital — Belgium</span>
+  </footer>
+
+  <!-- ─── Project Overlay ─────────────────────────────────────────────────── -->
+  <div id="overlay" class="overlay"></div>
+
+  <!-- ─── Book Mode ───────────────────────────────────────────────────────── -->
+  <div id="book" class="book-overlay">
+    <div class="book-topbar">
+      <span class="label book-crumb"></span>
+      <button class="book-close" onclick="closeBook()">Close ✕</button>
+    </div>
+    <div class="book-stage">
+      <button class="book-arrow prev" id="book-prev" aria-label="Previous page">←</button>
+      <div class="book">
+        <div class="book-spread" id="book-spread"></div>
+        <div class="book-zone left" id="book-zone-prev"></div>
+        <div class="book-zone right" id="book-zone-next"></div>
+      </div>
+      <button class="book-arrow next" id="book-next" aria-label="Next page">→</button>
+    </div>
+    <div class="book-bottombar">
+      <span class="label book-counter"></span>
+    </div>
+  </div>
+
+  <script src="js/photos.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
