@@ -4,6 +4,7 @@
 :root {
   --font-display: 'Anton', sans-serif;
   --font-body:    'Inter', sans-serif;
+  --font-script:  'Pinyon Script', 'Segoe Script', cursive;
   --ease:         cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -370,11 +371,11 @@ body:not(.mono) .work-item:hover img { filter: saturate(1.1) contrast(1.03); }
   border-right: 1px solid var(--border);
 }
 .about-heading {
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  font-size: clamp(44px, 6vw, 92px);
-  line-height: 0.86;
+  font-family: var(--font-script);
+  font-size: clamp(56px, 7vw, 110px);
+  line-height: 0.98;
   margin-bottom: 32px;
+  padding-right: 0.08em;
 }
 .about-body { font-size: 14px; line-height: 1.8; max-width: 400px; margin-bottom: 24px; opacity: 0.85; }
 .about-detail { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; margin-top: 20px; }
@@ -391,11 +392,11 @@ body:not(.mono) .work-item:hover img { filter: saturate(1.1) contrast(1.03); }
   border-bottom: 1px solid var(--border);
 }
 .contact-heading {
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  font-size: clamp(44px, 7vw, 110px);
-  line-height: 0.84;
+  font-family: var(--font-script);
+  font-size: clamp(56px, 8vw, 128px);
+  line-height: 0.95;
   margin-bottom: 24px;
+  padding-right: 0.08em;
 }
 .contact-sub { font-size: 13px; color: var(--muted); margin-bottom: 28px; max-width: 320px; }
 .contact-email {
@@ -577,11 +578,11 @@ body.has-cursor .work-item img { cursor: none; }
 @keyframes introEnter { to { opacity: 1; transform: none; } }
 .intro-name {
   display: block;
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  font-size: clamp(24px, 4.5vw, 50px);
-  letter-spacing: 0.04em;
-  line-height: 1;
+  font-family: var(--font-script);
+  font-size: clamp(46px, 8vw, 96px);
+  letter-spacing: 0.01em;
+  line-height: 1.05;
+  padding: 0 0.1em;
 }
 .intro-line {
   display: block;
@@ -658,12 +659,14 @@ body.has-cursor .work-item img { cursor: none; }
   body.menu-open .nav-links { transform: translateY(0); opacity: 1; }
   body.menu-open { overflow: hidden; }
 
-  /* Hero — fit the wordmark, calm the top */
-  .hero-content { padding: 24px; }
+  /* Hero — title up top (over the hair), quote at the bottom, so her gaze
+     in the middle of the frame stays uncovered */
+  .hero-content { padding: 24px; justify-content: space-between; padding-top: 90px; }
   .hero-meta-top { display: none; }
-  .hero-title { font-size: clamp(42px, 15.5vw, 76px); letter-spacing: 0; line-height: 0.86; }
+  .hero-title { font-size: clamp(40px, 14.5vw, 72px); letter-spacing: 0; line-height: 0.86; }
   .hero-quote { max-width: none; }
-  .hero-desc { font-size: 15px; }
+  .hero-desc { font-size: 14px; }
+  .hero-bottom { margin-top: 0; }
 }
 
 /* ─── Works head right (book trigger) ───────────────────────────────────── */
