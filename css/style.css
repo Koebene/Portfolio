@@ -93,7 +93,7 @@ nav {
 }
 
 .nav-logo { display: flex; align-items: center; }
-.nav-logo .logo-sig { display: block; height: 34px; width: auto; }
+.nav-logo .logo-sig { display: block; height: 42px; width: auto; }
 
 .nav-links { display: flex; gap: 40px; list-style: none; }
 
@@ -376,9 +376,9 @@ body:not(.mono) .work-item:hover img { filter: saturate(1.1) contrast(1.03); }
   position: absolute;
   right: 16px; bottom: 12px;
   z-index: 4;
-  width: clamp(62px, 7.5vw, 100px);
+  width: clamp(78px, 9vw, 122px);
   height: auto;
-  opacity: 0.5;
+  opacity: 0.55;
   pointer-events: none;
   filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
   transition: opacity 0.4s var(--ease);
@@ -386,7 +386,7 @@ body:not(.mono) .work-item:hover img { filter: saturate(1.1) contrast(1.03); }
 .work-item:hover .photo-mark { opacity: 0.82; }
 .overlay-hero-image .photo-mark {
   right: 24px; bottom: 18px; z-index: 5;
-  width: clamp(96px, 12vw, 150px); height: auto; opacity: 0.6;
+  width: clamp(120px, 14vw, 185px); height: auto; opacity: 0.62;
 }
 
 /* ─── About ─────────────────────────────────────────────────────────────── */
@@ -612,7 +612,7 @@ body.has-cursor .work-item img { cursor: none; }
 @keyframes introEnter { to { opacity: 1; transform: none; } }
 .intro-sig {
   display: block;
-  width: clamp(230px, 36vw, 440px);
+  width: clamp(280px, 42vw, 520px);
   height: auto;
   margin: 0 auto 24px;
 }

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logo Lab — Calligraphic Explorations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Great+Vibes&family=Inter:wght@300;400;500&family=Italianno&family=Marcellus&family=Pinyon+Script&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Tangerine:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B0B0C; --fg:#F4F3EF; --muted:#8a8a86; --border:rgba(244,243,239,0.12);
+    --gold:#C9B68A;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--fg);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  .lab-head{padding:64px 40px 28px;border-bottom:1px solid var(--border);}
+  .lab-kicker{font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--muted);}
+  .lab-title{font-family:'Anton',sans-serif;font-size:clamp(40px,7vw,84px);line-height:.92;text-transform:uppercase;margin:14px 0 16px;}
+  .lab-intro{max-width:620px;font-weight:300;line-height:1.7;color:#cfcfca;font-size:15px;}
+  .lab-intro b{color:var(--fg);font-weight:500;}
+
+  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:20px 40px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(11,11,12,.86);backdrop-filter:blur(8px);z-index:5;}
+  .toolbar span{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-right:6px;}
+  .toolbar button{background:transparent;color:var(--fg);border:1px solid var(--border);padding:8px 14px;border-radius:999px;font-family:inherit;font-size:12px;letter-spacing:.04em;cursor:pointer;transition:.2s;}
+  .toolbar button:hover{border-color:var(--fg);}
+  .toolbar button.active{background:var(--fg);color:var(--bg);border-color:var(--fg);}
+
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);}
+  @media(max-width:880px){.grid{grid-template-columns:1fr;}}
+  .card{border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:0;position:relative;overflow:hidden;}
+  .stage{height:300px;display:flex;align-items:center;justify-content:center;text-align:center;padding:32px;position:relative;}
+  body.light-stages .stage{background:#F4F3EF;color:#0B0B0C;}
+  .meta{padding:18px 28px 26px;border-top:1px solid var(--border);display:flex;justify-content:space-between;gap:18px;align-items:flex-start;}
+  .meta .no{font-size:11px;letter-spacing:.2em;color:var(--muted);}
+  .meta .nm{font-size:13px;font-weight:500;letter-spacing:.02em;margin-bottom:5px;}
+  .meta .ds{font-size:12px;line-height:1.6;color:var(--muted);max-width:340px;}
+
+  /* ── logo concept styles ───────────────────────────────────────── */
+  .c-pinyon{font-family:'Pinyon Script',cursive;font-size:clamp(40px,7vw,70px);line-height:1;}
+  .c-greatvibes{font-family:'Great Vibes',cursive;font-size:clamp(46px,7vw,78px);line-height:.9;}
+  .c-italianno{font-family:'Italianno',cursive;font-size:clamp(64px,11vw,120px);line-height:.8;}
+  .c-tangerine{font-family:'Tangerine',cursive;font-weight:700;font-size:clamp(70px,12vw,130px);line-height:.8;}
+
+  /* 2 — script + engraved caps lockup */
+  .lock{display:flex;flex-direction:column;align-items:center;}
+  .lock .script{font-family:'Great Vibes',cursive;font-size:clamp(52px,8vw,86px);line-height:.8;margin-bottom:8px;}
+  .lock .caps{font-family:'Cinzel',serif;font-weight:500;letter-spacing:.42em;font-size:13px;text-indent:.42em;}
+  .lock .rule{width:30px;height:1px;background:currentColor;opacity:.4;margin:14px 0;}
+
+  /* 3 — monogram in film frame */
+  .mono-frame{width:150px;height:150px;border:1px solid currentColor;display:flex;align-items:center;justify-content:center;position:relative;}
+  .mono-frame::before{content:"";position:absolute;inset:8px;border:1px solid currentColor;opacity:.3;}
+  .mono-frame .mono{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:64px;letter-spacing:-.04em;}
+
+  /* 4 — initial + stacked name */
+  .initial{display:flex;align-items:center;gap:22px;}
+  .initial .big{font-family:'Pinyon Script',cursive;font-size:clamp(90px,14vw,150px);line-height:.7;}
+  .initial .stack{text-align:left;border-left:1px solid currentColor;padding-left:20px;}
+  .initial .stack .a{font-family:'Marcellus',serif;font-size:20px;letter-spacing:.06em;line-height:1.25;}
+  .initial .stack .b{font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--muted);margin-top:8px;}
+
+  /* 5 — engraved serif RVR */
+  .cinzel-rvr{font-family:'Cinzel',serif;font-weight:600;font-size:clamp(40px,6vw,64px);letter-spacing:.18em;text-indent:.18em;}
+  .cinzel-sub{font-family:'Inter';font-size:10px;letter-spacing:.42em;text-transform:uppercase;color:var(--muted);margin-top:16px;text-indent:.42em;}
+
+  /* 6 — editorial mix: bold display + script overlay */
+  .mix{position:relative;display:inline-block;}
+  .mix .bold{font-family:'Anton',sans-serif;text-transform:uppercase;font-size:clamp(34px,5.5vw,58px);letter-spacing:.01em;}
+  .mix .script{font-family:'Great Vibes',cursive;font-size:clamp(40px,6vw,66px);position:absolute;left:-14px;top:-34px;color:var(--gold);transform:rotate(-6deg);}
+
+  /* 7 — Playfair italic flourish wordmark */
+  .playfair{font-family:'Playfair Display',serif;font-style:italic;font-weight:400;font-size:clamp(30px,5vw,52px);line-height:1.05;}
+  .playfair .amp{color:var(--muted);}
+
+  /* 8 — refined two-line cormorant */
+  .corm{font-family:'Cormorant Garamond',serif;font-weight:500;line-height:1.0;}
+  .corm .l1{font-style:italic;font-size:clamp(40px,6vw,62px);}
+  .corm .l2{letter-spacing:.30em;font-size:clamp(15px,2vw,20px);text-transform:uppercase;text-indent:.30em;margin-top:6px;}
+
+  /* signature reference */
+  .sig-ref{max-width:78%;max-height:150px;}
+  body.light-stages .sig-ref{content:url('images/signature-black.png');}
+
+  .foot{padding:40px;color:var(--muted);font-size:12px;letter-spacing:.04em;border-top:1px solid var(--border);}
+  .foot a{color:var(--fg);}
+  .gold-tag{color:var(--gold);}
+</style>
+</head>
+<body>
+  <div class="lab-head">
+    <div class="lab-kicker">Internal — Brand Exploration</div>
+    <h1 class="lab-title">Logo Lab</h1>
+    <p class="lab-intro">A set of <b>calligraphic &amp; engraved logo directions</b> for the portfolio, shown in the site’s own palette. The aim: something that reads as <b>premium and personal</b> without competing with the bold Anton headlines. Toggle the background to see each on dark and light. Tell me the number(s) you’re drawn to and I’ll refine, vectorise, and wire it through the site (nav, intro, favicon, watermark).</p>
+  </div>
+
+  <div class="toolbar">
+    <span>Background</span>
+    <button id="bg-dark" class="active">Dark</button>
+    <button id="bg-light">Light</button>
+  </div>
+
+  <div class="grid">
+    <div class="card"><div class="stage"><div class="c-pinyon">Ruben Van Ruysseveldt</div></div>
+      <div class="meta"><span class="no">01</span><div><div class="nm">Pure Pinyon script</div><div class="ds">The full name in flowing copperplate. Romantic, classic — the most overtly “signature”. Best very large; gets fragile when small.</div></div></div></div>
+
+    <div class="card"><div class="stage"><div class="lock"><div class="script">Ruben</div><div class="rule"></div><div class="caps">VAN RUYSSEVELDT</div></div></div>
+      <div class="meta"><span class="no">02</span><div><div class="nm">Script + engraved caps lockup</div><div class="ds">Great Vibes first name over Cinzel small-caps surname. Gallery-grade hierarchy — elegant yet legible at any size. Strong all-rounder.</div></div></div></div>
+
+    <div class="card"><div class="stage"><div class="mono-frame"><div class="mono">R<span style="font-size:.7em;vertical-align:.1em;">v</span>R</div></div></div>
+      <div class="meta"><span class="no">03</span><div><div class="nm">Monogram in film frame</div><div class="ds">Italic Cormorant “RvR” inside a double rule echoing a film negative. Compact, perfect for favicon &amp; watermark. Quiet luxury.</div></div></div></div>
+
+    <div class="card"><div class="stage"><div class="initial"><div class="big">R</div><div class="stack"><div class="a">Ruben Van<br>Ruysseveldt</div><div class="b">Photography</div></div></div></div>
+      <div class="meta"><span class="no">04</span><div><div class="nm">Calligraphic initial + serif name</div><div class="ds">An oversized script “R” anchors a tidy Marcellus name block. Editorial, masthead-like — reads beautifully in the nav.</div></div></div></div>
+
+    <div class="card"><div class="stage"><div><div class="cinzel-rvr">RVR</div><div class="cinzel-sub">Ruben Van Ruysseveldt</div></div></div>
+      <div class="meta"><span class="no">05</span><div><div class="nm">Engraved serif initials</div><div class="ds">Cinzel caps — Roman, carved, museum-label calm. Not calligraphy but supremely premium; pairs cleanly with Anton.</div></div></div></div>
+
+    <div class="card"><div class="stage"><div class="mix"><span class="script">Ruben</span><span class="bold">RUYSSEVELDT</span></div></div>
+      <div class="meta"><span class="no">06</span><div><div class="nm">Editorial mix (bold + script)</div><div class="ds">Keeps your existing Anton attitude and lets a gold script first-name lean across it. Confident, fashion-editorial energy.</div></div></div></div>
+
+    <div class="card"><div class="stage"><div class="playfair">Ruben <span class="amp">·</span> Van Ruysseveldt</div></div>
+      <div class="meta"><span class="no">07</span><div><div class="nm">Playfair italic wordmark</div><div class="ds">High-contrast italic serif on one line. Sophisticated and very legible — a restrained, timeless option.</div></div></div></div>
+
+    <div class="card"><div class="stage"><div class="corm"><div class="l1">Ruben Van Ruysseveldt</div><div class="l2">Photography</div></div></div>
+      <div class="meta"><span class="no">08</span><div><div class="nm">Cormorant two-line</div><div class="ds">Italic display line + letter-spaced caps tagline. Soft, literary, luxurious — feels like a fine print monograph.</div></div></div></div>
+
+    <div class="card"><div class="stage"><div class="c-italianno">Ruben Van Ruysseveldt</div></div>
+      <div class="meta"><span class="no">09</span><div><div class="nm">Italianno — fine pen</div><div class="ds">A lighter, faster hand than Pinyon — closer to a real fountain-pen signature. Airy and modern-romantic.</div></div></div></div>
+
+    <div class="card"><div class="stage"><img class="sig-ref" src="images/signature-white.png" alt="current signature mark"></div>
+      <div class="meta"><span class="no">00</span><div><div class="nm">Your current mark <span class="gold-tag">(live)</span></div><div class="ds">The real handwritten “Van Ruyssen” mark in use now — shown for comparison against the type-based directions above.</div></div></div></div>
+  </div>
+
+  <div class="foot">Reply with the numbers you like (e.g. “02 + 03”). I can blend directions — e.g. a script wordmark for the masthead and a monogram for the favicon/watermark. · <a href="index.html">← back to site</a></div>
+
+  <script>
+    const d=document.getElementById('bg-dark'),l=document.getElementById('bg-light');
+    d.onclick=()=>{document.body.classList.remove('light-stages');d.classList.add('active');l.classList.remove('active');
+      document.querySelectorAll('.sig-ref').forEach(i=>i.src='images/signature-white.png');};
+    l.onclick=()=>{document.body.classList.add('light-stages');l.classList.add('active');d.classList.remove('active');
+      document.querySelectorAll('.sig-ref').forEach(i=>i.src='images/signature-black.png');};
+  </script>
+</body>
+</html>
