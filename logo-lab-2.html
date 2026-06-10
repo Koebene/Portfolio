@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logo Lab II — Signature Directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500&family=Marcellus&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#0B0B0C; --fg:#F4F3EF; --muted:#8a8a86; --border:rgba(244,243,239,0.12); --gold:#C9B68A; }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--fg);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  .lab-head{padding:64px 40px 28px;border-bottom:1px solid var(--border);}
+  .lab-kicker{font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--muted);}
+  .lab-title{font-family:'Anton',sans-serif;font-size:clamp(40px,7vw,84px);line-height:.92;text-transform:uppercase;margin:14px 0 16px;}
+  .lab-intro{max-width:640px;font-weight:300;line-height:1.7;color:#cfcfca;font-size:15px;}
+  .lab-intro b{color:var(--fg);font-weight:500;}
+
+  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:20px 40px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(11,11,12,.86);backdrop-filter:blur(8px);z-index:5;}
+  .toolbar span{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-right:6px;}
+  .toolbar button{background:transparent;color:var(--fg);border:1px solid var(--border);padding:8px 14px;border-radius:999px;font-family:inherit;font-size:12px;cursor:pointer;transition:.2s;}
+  .toolbar button:hover{border-color:var(--fg);}
+  .toolbar button.active{background:var(--fg);color:var(--bg);border-color:var(--fg);}
+
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);}
+  @media(max-width:880px){.grid{grid-template-columns:1fr;}}
+  .card{border-right:1px solid var(--border);border-bottom:1px solid var(--border);position:relative;}
+  .stage{min-height:300px;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px;position:relative;}
+  body.light-stages .stage{background:#F4F3EF;color:#0B0B0C;}
+  .meta{padding:18px 28px 26px;border-top:1px solid var(--border);display:flex;justify-content:space-between;gap:18px;align-items:flex-start;}
+  .meta .no{font-size:11px;letter-spacing:.2em;color:var(--muted);}
+  .meta .nm{font-size:13px;font-weight:500;margin-bottom:5px;}
+  .meta .ds{font-size:12px;line-height:1.6;color:var(--muted);max-width:340px;}
+
+  .sig{display:block;height:auto;}
+  /* the mark recolours with the theme by swapping src in JS */
+
+  /* S1 — masthead lockup (the #04 idea, real signature) */
+  .s1{display:flex;align-items:center;gap:26px;}
+  .s1 .sig{height:104px;}
+  .s1 .rule{width:1px;height:92px;background:currentColor;opacity:.32;}
+  .s1 .name{font-family:'Marcellus',serif;font-size:23px;line-height:1.22;text-align:left;}
+  .s1 .tag{font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--muted);margin-top:9px;text-align:left;}
+
+  /* S2 — stacked & centered, engraved caps under signature */
+  .s2{display:flex;flex-direction:column;align-items:center;}
+  .s2 .sig{height:120px;}
+  .s2 .rule{width:46px;height:1px;background:currentColor;opacity:.4;margin:18px 0 16px;}
+  .s2 .caps{font-family:'Cinzel',serif;font-weight:500;letter-spacing:.34em;font-size:14px;text-indent:.34em;}
+
+  /* S3 — real nav lockup, at scale */
+  .s3wrap{display:flex;flex-direction:column;gap:22px;align-items:center;}
+  .s3{display:flex;align-items:center;gap:16px;}
+  .s3 .sig{height:38px;}
+  .s3 .rule{width:1px;height:26px;background:currentColor;opacity:.3;}
+  .s3 .tag{font-size:11px;letter-spacing:.30em;text-transform:uppercase;}
+  .s3note{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);}
+
+  /* S4 — letterhead: signature over italic tagline */
+  .s4{display:flex;flex-direction:column;align-items:center;gap:10px;}
+  .s4 .sig{height:128px;}
+  .s4 .it{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:24px;color:var(--muted);}
+
+  /* S5 — signature + engraved initials block */
+  .s5{display:flex;align-items:center;gap:30px;}
+  .s5 .sig{height:96px;}
+  .s5 .blk{text-align:left;border-left:1px solid currentColor;padding-left:24px;}
+  .s5 .rvr{font-family:'Cinzel',serif;font-weight:600;letter-spacing:.16em;font-size:30px;text-indent:.16em;}
+  .s5 .sub{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);margin-top:8px;}
+
+  /* S6 — editorial: signed print */
+  .s6{position:relative;display:inline-block;padding:10px 30px 46px;}
+  .s6 .big{font-family:'Anton',sans-serif;text-transform:uppercase;font-size:clamp(40px,7vw,72px);line-height:.9;}
+  .s6 .sub{font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--muted);margin-top:10px;}
+  .s6 .sig{position:absolute;right:8px;bottom:0;height:64px;transform:rotate(-3deg);opacity:.92;}
+
+  .foot{padding:40px;color:var(--muted);font-size:12px;line-height:1.7;border-top:1px solid var(--border);}
+  .foot a{color:var(--fg);}
+</style>
+</head>
+<body>
+  <div class="lab-head">
+    <div class="lab-kicker">Internal — Brand Exploration II</div>
+    <h1 class="lab-title">Signature<br>Directions</h1>
+    <p class="lab-intro">You liked <b>#04</b> (a calligraphic initial anchoring a clean serif name). Here’s that same masthead logic — but built around your <b>real handwritten mark</b> instead of a type-script. The signature brings the personality; <b>Marcellus / Cinzel</b> typography brings the legibility the scrawl alone can’t. Toggle dark/light. Pick the number you like and I’ll refine the spacing, lock the proportions, and wire it through nav, intro &amp; the print overlay.</p>
+  </div>
+
+  <div class="toolbar">
+    <span>Background</span>
+    <button id="bg-dark" class="active">Dark</button>
+    <button id="bg-light">Light</button>
+  </div>
+
+  <div class="grid">
+    <div class="card"><div class="stage"><div class="s1">
+      <img class="sig" src="images/signature-white.png" alt="">
+      <div class="rule"></div>
+      <div><div class="name">Ruben Van<br>Ruysseveldt</div><div class="tag">Photography</div></div>
+    </div></div>
+      <div class="meta"><span class="no">S1</span><div><div class="nm">Masthead lockup</div><div class="ds">Your mark as the “initial”, a hairline rule, then the name in Marcellus + a quiet tagline. The direct evolution of #04 — personal <em>and</em> legible.</div></div></div></div>
+
+    <div class="card"><div class="stage"><div class="s2">
+      <img class="sig" src="images/signature-white.png" alt="">
+      <div class="rule"></div>
+      <div class="caps">RUBEN VAN RUYSSEVELDT</div>
+    </div></div>
+      <div class="meta"><span class="no">S2</span><div><div class="nm">Stacked &amp; centred</div><div class="ds">Signature above an engraved Cinzel name. Symmetrical, monograph-like — ideal for the intro splash and a centred footer.</div></div></div></div>
+
+    <div class="card"><div class="stage"><div class="s3wrap">
+      <div class="s3"><img class="sig" src="images/signature-white.png" alt=""><div class="rule"></div><div class="tag">Photography</div></div>
+      <div class="s3note">↑ shown at real nav size</div>
+    </div></div>
+      <div class="meta"><span class="no">S3</span><div><div class="nm">Nav lockup (true scale)</div><div class="ds">How it actually reads in the top bar: mark + divider + small-caps label. Compact, balanced, unmistakably yours.</div></div></div></div>
+
+    <div class="card"><div class="stage"><div class="s4">
+      <img class="sig" src="images/signature-white.png" alt="">
+      <div class="it">Photography — Belgium</div>
+    </div></div>
+      <div class="meta"><span class="no">S4</span><div><div class="nm">Letterhead</div><div class="ds">Mark over an italic Cormorant line. Feels like signed stationery — warm, editorial, great for the intro &amp; contact.</div></div></div></div>
+
+    <div class="card"><div class="stage"><div class="s5">
+      <img class="sig" src="images/signature-white.png" alt="">
+      <div class="blk"><div class="rvr">RVR</div><div class="sub">Ruben Van Ruysseveldt</div></div>
+    </div></div>
+      <div class="meta"><span class="no">S5</span><div><div class="nm">Signature + engraved initials</div><div class="ds">Pairs the scrawl with a carved “RVR” — and that RVR becomes the clean <b>favicon/watermark</b> mate for small sizes where the signature gets fragile.</div></div></div></div>
+
+    <div class="card"><div class="stage"><div class="s6">
+      <div class="big">PHOTO<br>GRAPHY</div>
+      <div class="sub">Ruben Van Ruysseveldt</div>
+      <img class="sig" src="images/signature-white.png" alt="">
+    </div></div>
+      <div class="meta"><span class="no">S6</span><div><div class="nm">Signed print (editorial)</div><div class="ds">Keeps the bold Anton hero and lets the signature sign it in the corner — like a fine print. Ties the mark to the look you already have.</div></div></div></div>
+  </div>
+
+  <div class="foot">
+    <b style="color:var(--fg)">My pick:</b> <b style="color:var(--fg)">S1</b> for the nav/masthead + <b style="color:var(--fg)">S5</b>’s engraved “RVR” as the favicon &amp; photo watermark — signature where there’s room, clean initials where there isn’t.<br><br>
+    Note: I tried cropping a square monogram straight out of the signature, but at favicon size it reads as an abstract scribble — that’s why S5 introduces a tidy RVR for the tiny sizes.<br><br>
+    Reply with a number (e.g. “S1” or “S1 + S5”). · <a href="logo-lab.html">← type concepts (Lab I)</a> · <a href="index.html">site</a>
+  </div>
+
+  <script>
+    const d=document.getElementById('bg-dark'),l=document.getElementById('bg-light');
+    const setSig=src=>document.querySelectorAll('.sig').forEach(i=>i.src=src);
+    d.onclick=()=>{document.body.classList.remove('light-stages');d.classList.add('active');l.classList.remove('active');setSig('images/signature-white.png');};
+    l.onclick=()=>{document.body.classList.add('light-stages');l.classList.add('active');d.classList.remove('active');setSig('images/signature-black.png');};
+  </script>
+</body>
+</html>
