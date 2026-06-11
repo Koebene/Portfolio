@@ -108,7 +108,7 @@ function renderWorks(key) {
       item.style.flexBasis = "0";
       item.innerHTML = `
         <img src="${p.src}" alt="${p.titleFlat}" loading="lazy">
-        <img class="photo-mark" src="images/signature-white.png" alt="" loading="lazy">
+        <img class="photo-mark" src="images/logo-mark.svg" alt="" loading="lazy">
         <div class="work-overlay">
           <span class="work-num">${String(i + 1).padStart(2, "0")}</span>
           <div class="work-info">
@@ -253,7 +253,7 @@ function openOverlay(key, idx) {
   const heroImageEl = document.getElementById("overlay-hero-image");
   buildFilmReveal(heroImageEl, p.src);
   heroImageEl.insertAdjacentHTML("beforeend",
-    '<img class="photo-mark" src="images/signature-white.png" alt="">');
+    '<img class="photo-mark" src="images/logo-mark.svg" alt="">');
   overlay.scrollTop = 0;
   requestAnimationFrame(() => overlay.classList.add("open"));
   document.body.style.overflow = "hidden";
