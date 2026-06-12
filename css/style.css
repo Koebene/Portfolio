@@ -63,24 +63,28 @@ button { font-family: inherit; cursor: pointer; background: none; border: none; 
 html { scrollbar-width: thin; scrollbar-color: var(--muted) transparent; }
 
 /* ─── Film grain — a quiet analog texture over everything ──────────────── */
+/* A tiled noise tile that jitters by a few px. Kept ~viewport-sized (inset
+   slightly beyond the edges so the shift never exposes a seam) rather than a
+   300% layer — a giant promoted layer is what made the compositor stutter on
+   scroll. */
 .grain {
   position: fixed;
-  top: -100%; left: -100%;
-  width: 300%; height: 300%;
+  inset: -24px;
   z-index: 600;
   pointer-events: none;
-  opacity: 0.055;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
-  animation: grainShift 1.2s steps(1, end) infinite;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  background-repeat: repeat;
+  animation: grainShift 1.1s steps(1) infinite;
   will-change: transform;
 }
 @keyframes grainShift {
   0%, 100% { transform: translate(0, 0); }
-  17%      { transform: translate(-2.4%, 1.6%); }
-  33%      { transform: translate(1.2%, -2.2%); }
-  50%      { transform: translate(-1.6%, -1%); }
-  67%      { transform: translate(2.2%, 1.2%); }
-  83%      { transform: translate(-1%, 2.4%); }
+  20%      { transform: translate(-7px, 5px); }
+  40%      { transform: translate(6px, -6px); }
+  60%      { transform: translate(-5px, -7px); }
+  80%      { transform: translate(7px, 6px); }
 }
 
 /* ─── Collection wipe — full-screen panel during mono/chroma switch ─────── */
@@ -121,13 +125,22 @@ nav {
   align-items: center;
   justify-content: space-between;
   padding: 22px 36px;
-  transition: transform 0.4s var(--ease);
-  mix-blend-mode: difference;
-  color: #fff;
+  /* Colour is driven by JS-set ink classes (over-hero / theme) instead of a
+     mix-blend-mode. A fixed blended element re-composites against the moving
+     page on every scroll frame, which flickers — class swaps don't. */
+  color: var(--fg);
+  transition: transform 0.4s var(--ease), color 0.5s var(--ease);
 }
+nav.ink-light { color: #F4F3EF; }
+nav.ink-dark  { color: var(--fg); }
 
 .nav-logo { display: flex; align-items: center; gap: 14px; }
 .nav-logo .logo-sig { display: block; height: 48px; width: 48px; }
+/* dual-ink seal: white over dark surfaces, dark-ink over the pale Chroma theme.
+   Selectors mirror `.nav-logo .logo-sig` specificity so the swap actually wins. */
+.nav-logo .logo-dark { display: none; }
+nav.ink-dark .nav-logo .logo-light { display: none; }
+nav.ink-dark .nav-logo .logo-dark  { display: block; }
 .nav-word {
   font-size: 10px;
   letter-spacing: 0.28em;
@@ -770,7 +783,7 @@ footer {
   opacity: 0;
   transform: scale(0.3);
   transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
-  will-change: transform, left, top;
+  will-change: transform;
 }
 .cursor-view.show { opacity: 1; transform: scale(1); }
 body.has-cursor .work-item,
@@ -910,7 +923,7 @@ body.has-cursor .work-item img { cursor: none; }
   .nav-links a { font-size: 18px; letter-spacing: 0.18em; opacity: 1; }
   .nav-links a::after { bottom: -6px; }
 
-  body.menu-open nav { mix-blend-mode: normal; color: var(--fg); }
+  body.menu-open nav { color: var(--fg); }
   body.menu-open .nav-links { transform: translateY(0); opacity: 1; }
   body.menu-open { overflow: hidden; }
 

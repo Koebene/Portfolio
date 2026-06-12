@@ -143,7 +143,11 @@ function renderWorks(key) {
 let resizeTimer;
 window.addEventListener("resize", () => {
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => renderWorks(current), 200);
+  resizeTimer = setTimeout(() => {
+    renderWorks(current);
+    const h = document.querySelector(".hero");
+    heroThreshold = (h ? h.offsetHeight : window.innerHeight) - 70;
+  }, 200);
 });
 
 /* ─── Switch Collection (+ theme) ───────────────────────────────────────────
@@ -162,6 +166,7 @@ function switchCollection(key) {
 
   if (REDUCED) {
     document.body.classList.toggle("mono", key === "mono");
+    updateNav();
     renderWorks(key);
     return;
   }
@@ -174,6 +179,7 @@ function switchCollection(key) {
 
   setTimeout(() => {
     document.body.classList.toggle("mono", key === "mono");
+    updateNav();
     renderWorks(key);
     wipe.classList.add("out");
     setTimeout(() => { wipe.classList.remove("in", "out"); switching = false; }, 700);
@@ -310,10 +316,29 @@ const observer = new IntersectionObserver(
 );
 function observeReveal() { document.querySelectorAll(".reveal").forEach((el) => observer.observe(el)); }
 
-/* ─── Nav hide on scroll + reading progress hairline ────────────────────── */
-let lastY = 0;
+/* ─── Nav ink: light over the dark hero / dark theme, dark over Chroma ─────
+   Replaces a fixed mix-blend-mode (which flickered against moving content on
+   scroll). State changes only on theme/section/menu changes — never per frame. */
 const nav = document.querySelector("nav");
+function updateNav() {
+  if (!nav) return;
+  const menuOpen = document.body.classList.contains("menu-open");
+  const onHero = nav.classList.contains("over-hero") && !menuOpen;
+  const lightInk = onHero || document.body.classList.contains("mono");
+  nav.classList.toggle("ink-light", lightInk);
+  nav.classList.toggle("ink-dark", !lightInk);
+}
+
+/* ─── Nav hide on scroll + reading progress + over-hero ink state ────────────
+   over-hero is derived here (same scroll signal the hide/progress use) rather
+   than via a separate observer, so the ink colour is always in step with the
+   scroll position. The hero is ~100vh; once it clears the nav line the nav ink
+   follows the section/theme instead. */
+let lastY = 0;
+let navOnHero = true;
 const progressEl = document.getElementById("progress");
+const heroEl = document.querySelector(".hero");
+let heroThreshold = (heroEl ? heroEl.offsetHeight : window.innerHeight) - 70;
 window.addEventListener("scroll", () => {
   const se = document.scrollingElement;
   const y = se.scrollTop;
@@ -322,6 +347,12 @@ window.addEventListener("scroll", () => {
   if (progressEl) {
     const max = se.scrollHeight - window.innerHeight;
     progressEl.style.transform = `scaleX(${max > 0 ? y / max : 0})`;
+  }
+  const onHero = y < heroThreshold;
+  if (onHero !== navOnHero) {
+    navOnHero = onHero;
+    nav.classList.toggle("over-hero", onHero);
+    updateNav();
   }
 }, { passive: true });
 
@@ -529,20 +560,27 @@ function initHeroMotion() {
   const content = document.querySelector(".hero-content");
   const meta = document.querySelector(".hero-meta-top");
   const side = document.querySelector(".hero-side");
-  let raf = null;
+  const vh = () => window.innerHeight;
+  let raf = null, lastF = -1;
   window.addEventListener("scroll", () => {
     if (raf) return;
     raf = requestAnimationFrame(() => {
-      const y = Math.min(document.scrollingElement.scrollTop, window.innerHeight);
-      const f = Math.max(0, 1 - y / (window.innerHeight * 0.85));
+      raf = null;
+      const y = document.scrollingElement.scrollTop;
+      // once the hero is fully scrolled past, stop writing styles (avoids
+      // needless repaints of the masthead subtree on every deep-page scroll)
+      if (y > vh()) { if (lastF !== 0) { lastF = 0; } return; }
+      const f = Math.max(0, 1 - y / (vh() * 0.85));
+      if (f === lastF) return;
+      lastF = f;
       content.style.opacity = f;
       content.style.transform = `translateY(${y * -0.08}px)`;
       if (meta) meta.style.opacity = f;
       if (side) side.style.opacity = f;
-      raf = null;
     });
   }, { passive: true });
 }
+
 
 /* keep the mobile browser chrome in step with the active theme */
 function setThemeColor(key) {
@@ -564,6 +602,7 @@ function initClock() {
 document.addEventListener("DOMContentLoaded", () => {
   normalizeCollections();
   document.body.classList.add("mono"); // start in monochrome
+  updateNav();                         // sync nav ink to the starting theme
   document.querySelectorAll(".switch-btn").forEach((btn) =>
     btn.addEventListener("click", () => switchCollection(btn.dataset.key))
   );
@@ -589,10 +628,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeMenu = () => {
     document.body.classList.remove("menu-open");
     navToggle.setAttribute("aria-expanded", "false");
+    updateNav();
   };
   navToggle.addEventListener("click", () => {
     const open = document.body.classList.toggle("menu-open");
     navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+    updateNav();
   });
   navLinks.addEventListener("click", (e) => { if (e.target.closest("a")) closeMenu(); });
 
