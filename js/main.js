@@ -118,7 +118,7 @@ function renderWorks(key) {
       item.style.transitionDelay = ci * 90 + "ms"; // stagger within the row
       item.innerHTML = `
         <img src="${p.src}" alt="${p.titleFlat}" loading="lazy">
-        <img class="photo-mark" src="images/logo-mark.svg" alt="" loading="lazy">
+        <img class="photo-mark" src="images/logo-watermark.svg" alt="" loading="lazy">
         <div class="work-overlay">
           <span class="work-num">${String(i + 1).padStart(2, "0")}</span>
           <div class="work-info">
@@ -283,7 +283,7 @@ function openOverlay(key, idx) {
   const heroImageEl = document.getElementById("overlay-hero-image");
   buildFilmReveal(heroImageEl, p.src);
   heroImageEl.insertAdjacentHTML("beforeend",
-    '<img class="photo-mark" src="images/logo-mark.svg" alt="">');
+    '<img class="photo-mark" src="images/logo-watermark.svg" alt="">');
   overlay.scrollTop = 0;
   requestAnimationFrame(() => overlay.classList.add("open"));
   document.body.style.overflow = "hidden";
