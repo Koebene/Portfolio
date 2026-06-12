@@ -18,6 +18,7 @@
   <meta name="twitter:description" content="A personal photography portfolio — film & digital, made in Belgium for the love of it.">
   <meta name="twitter:image" content="https://portfolio-mu-eight-vqpou60so0.vercel.app/images/share.jpg">
 
+  <link rel="preload" as="image" href="images/hero.jpeg">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="favicon.svg">
   <meta name="theme-color" content="#0B0B0C">
@@ -49,13 +50,17 @@
     })();
   </script>
 
-  <!-- ─── Film grain + collection wipe ───────────────────────────────── -->
+  <!-- ─── Film grain + scroll progress + collection wipe ─────────────── -->
   <div class="grain" aria-hidden="true"></div>
+  <div class="progress" id="progress" aria-hidden="true"></div>
   <div id="wipe" class="wipe" aria-hidden="true"><span class="wipe-name"></span></div>
 
   <!-- ─── Nav ─────────────────────────────────────────────────────────── -->
   <nav>
-    <span class="nav-logo"><img class="logo-sig" src="images/logo-mark.svg" alt="Ruben Van Ruysseveldt — Photography"></span>
+    <span class="nav-logo">
+      <img class="logo-sig" src="images/logo-mark.svg" alt="Ruben Van Ruysseveldt — Photography">
+      <span class="nav-word">Ruben Van Ruysseveldt</span>
+    </span>
     <button class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false">
       <span></span><span></span>
     </button>
@@ -119,7 +124,7 @@
     </div>
 
     <div class="works-head">
-      <span class="label">Selected Work</span>
+      <span class="label sec-label"><em>01</em> — Selected Work</span>
       <div class="works-head-right">
         <button class="book-trigger" id="open-book">View as Book ↗</button>
         <span class="label works-count">— Projects</span>
@@ -129,9 +134,18 @@
     <div class="works"><!-- populated by JS --></div>
   </section>
 
+  <!-- ─── Marquee ──────────────────────────────────────────────────────── -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      <span>Film — Digital — Monochrome — Chroma — Belgium — 35 mm —&nbsp;</span>
+      <span>Film — Digital — Monochrome — Chroma — Belgium — 35 mm —&nbsp;</span>
+    </div>
+  </div>
+
   <!-- ─── About ─────────────────────────────────────────────────────────── -->
   <section class="about reveal" id="about">
     <div class="about-text">
+      <span class="label sec-label"><em>02</em> — About</span>
       <h2 class="about-heading">About<br><em class="ital">the</em> Work</h2>
       <p class="about-pull">&ldquo;A slower, sharper way of looking at the world.&rdquo;</p>
       <p class="about-body">
@@ -162,6 +176,7 @@
   <!-- ─── Contact ─────────────────────────────────────────────────────────── -->
   <section class="contact reveal" id="contact">
     <div class="contact-left">
+      <span class="label sec-label"><em>03</em> — Contact</span>
       <h2 class="contact-heading">Say<br><em class="ital">hello</em></h2>
       <p class="contact-sub">This isn&rsquo;t a shop window &mdash; just a place to share what I see. If something here resonates, find me on Instagram.</p>
       <a class="contact-email" href="https://www.instagram.com/rubenvanruysseveldt/" target="_blank" rel="noopener">@rubenvanruysseveldt</a>
@@ -172,6 +187,13 @@
       </div>
     </div>
   </section>
+
+  <!-- ─── Colophon end-mark ─────────────────────────────────────────────── -->
+  <div class="colophon reveal">
+    <img class="colophon-mark on-dark" src="images/logo-mark.svg" alt="">
+    <img class="colophon-mark on-light" src="images/logo-mark-dark.svg" alt="">
+    <span class="label">Made for the love of it — Belgium</span>
+  </div>
 
   <!-- ─── Footer ─────────────────────────────────────────────────────────── -->
   <footer>

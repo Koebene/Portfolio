@@ -158,6 +158,8 @@ function switchCollection(key) {
     btn.classList.toggle("active", btn.dataset.key === key);
   });
 
+  setThemeColor(key);
+
   if (REDUCED) {
     document.body.classList.toggle("mono", key === "mono");
     renderWorks(key);
@@ -308,14 +310,20 @@ const observer = new IntersectionObserver(
 );
 function observeReveal() { document.querySelectorAll(".reveal").forEach((el) => observer.observe(el)); }
 
-/* ─── Nav hide on scroll ────────────────────────────────────────────────── */
+/* ─── Nav hide on scroll + reading progress hairline ────────────────────── */
 let lastY = 0;
 const nav = document.querySelector("nav");
+const progressEl = document.getElementById("progress");
 window.addEventListener("scroll", () => {
-  const y = window.scrollY;
+  const se = document.scrollingElement;
+  const y = se.scrollTop;
   nav.style.transform = y > lastY && y > 100 ? "translateY(-110%)" : "";
   lastY = y;
-});
+  if (progressEl) {
+    const max = se.scrollHeight - window.innerHeight;
+    progressEl.style.transform = `scaleX(${max > 0 ? y / max : 0})`;
+  }
+}, { passive: true });
 
 /* ─── Smooth anchors ────────────────────────────────────────────────────── */
 document.querySelectorAll('a[href^="#"]').forEach((a) =>
@@ -525,7 +533,7 @@ function initHeroMotion() {
   window.addEventListener("scroll", () => {
     if (raf) return;
     raf = requestAnimationFrame(() => {
-      const y = Math.min(window.scrollY, window.innerHeight);
+      const y = Math.min(document.scrollingElement.scrollTop, window.innerHeight);
       const f = Math.max(0, 1 - y / (window.innerHeight * 0.85));
       content.style.opacity = f;
       content.style.transform = `translateY(${y * -0.08}px)`;
@@ -534,6 +542,12 @@ function initHeroMotion() {
       raf = null;
     });
   }, { passive: true });
+}
+
+/* keep the mobile browser chrome in step with the active theme */
+function setThemeColor(key) {
+  document.querySelector('meta[name="theme-color"]')
+    ?.setAttribute("content", key === "mono" ? "#0B0B0C" : "#F3F1EA");
 }
 
 /* ─── Local time (Belgium) in the footer ────────────────────────────────── */

@@ -126,8 +126,38 @@ nav {
   color: #fff;
 }
 
-.nav-logo { display: flex; align-items: center; }
+.nav-logo { display: flex; align-items: center; gap: 14px; }
 .nav-logo .logo-sig { display: block; height: 48px; width: 48px; }
+.nav-word {
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  opacity: 0.9;
+  white-space: nowrap;
+}
+
+/* scroll progress hairline */
+.progress {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--fg);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  z-index: 140;
+  pointer-events: none;
+}
+
+/* section index — serif italic numeral in the running labels */
+.sec-label em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 15px;
+  color: var(--fg);
+  margin-right: 3px;
+  letter-spacing: 0;
+}
+.about-text .sec-label, .contact-left .sec-label { display: block; margin-bottom: 20px; }
 
 .nav-links { display: flex; gap: 40px; list-style: none; }
 
@@ -485,6 +515,31 @@ body:not(.mono) .work-item:hover img { filter: saturate(1.1) contrast(1.03); }
   width: clamp(84px, 9.5vw, 124px); height: auto; opacity: 0.6;
 }
 
+/* ─── Marquee — slow editorial ticker between sections ──────────────────── */
+.marquee { overflow: hidden; padding: 34px 0 38px; }
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 38s linear infinite;
+}
+.marquee-track span {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  white-space: nowrap;
+  font-size: clamp(44px, 6vw, 92px);
+  line-height: 1;
+  color: var(--muted);
+  opacity: 0.4;
+}
+@supports (-webkit-text-stroke: 1px black) {
+  .marquee-track span {
+    color: transparent;
+    -webkit-text-stroke: 1px var(--muted);
+    opacity: 0.8;
+  }
+}
+@keyframes marqueeScroll { to { transform: translateX(-50%); } }
+
 /* ─── About ─────────────────────────────────────────────────────────────── */
 .about {
   display: grid;
@@ -552,6 +607,21 @@ body:not(.mono) .work-item:hover img { filter: saturate(1.1) contrast(1.03); }
   color: var(--muted); transition: color 0.2s;
 }
 .contact-socials a:hover { color: var(--fg); }
+
+/* ─── Colophon — closing seal above the footer ──────────────────────────── */
+.colophon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 84px 24px 56px;
+  text-align: center;
+}
+.colophon-mark { width: 118px; height: 118px; opacity: 0.92; }
+.colophon .on-light { display: block; }
+.colophon .on-dark { display: none; }
+body.mono .colophon .on-light { display: none; }
+body.mono .colophon .on-dark { display: block; }
 
 /* ─── Footer ────────────────────────────────────────────────────────────── */
 footer {
@@ -766,6 +836,7 @@ body.has-cursor .work-item img { cursor: none; }
 @media (prefers-reduced-motion: reduce) {
   #intro { animation-delay: 0.4s; }
   .grain { animation: none; }
+  .marquee-track { animation: none; }
   .line-in, .hero-kicker, .hero-bottom, .hero-meta-top, .hero-side { transform: none; opacity: 1; transition: none; }
   .hero-side { transform: translateY(-50%); }
   .work-item { opacity: 1; clip-path: none; transition: none; }
@@ -824,6 +895,7 @@ body.has-cursor .work-item img { cursor: none; }
   /* Nav → hamburger + full-screen menu */
   nav { padding: 18px 22px; }
   .nav-logo { white-space: nowrap; font-size: 11px; position: relative; z-index: 2; }
+  .nav-word { display: none; }
   .nav-toggle { display: block; position: relative; z-index: 2; }
 
   .nav-links {
