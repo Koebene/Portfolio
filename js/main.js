@@ -19,6 +19,7 @@ function loadCollections() {
 
 const collections = loadCollections();
 let current = "mono";
+const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /* Fill in derived fields the rest of the code expects. */
 function normalizeCollections() {
@@ -77,6 +78,14 @@ function buildRows(items, W, seed, gap) {
 
 const SEED = { mono: 7, color: 23 };
 
+/* Reveal gallery photos as they scroll into view (clip + scale settle). */
+const workIO = new IntersectionObserver(
+  (entries) => entries.forEach((e) => {
+    if (e.isIntersecting) { e.target.classList.add("in"); workIO.unobserve(e.target); }
+  }),
+  { threshold: 0.12, rootMargin: "0px 0px -6% 0px" }
+);
+
 /* ─── Render Works (justified layout) ───────────────────────────────────── */
 function renderWorks(key) {
   const col = collections[key];
@@ -100,12 +109,13 @@ function renderWorks(key) {
     rowEl.className = "works-row";
     rowEl.style.height = r.h + "px";
 
-    r.items.forEach((p) => {
+    r.items.forEach((p, ci) => {
       const i = col.photos.indexOf(p);
       const item = document.createElement("div");
       item.className = "work-item";
       item.style.flexGrow = p._ar;          // width proportional to aspect ratio
       item.style.flexBasis = "0";
+      item.style.transitionDelay = ci * 90 + "ms"; // stagger within the row
       item.innerHTML = `
         <img src="${p.src}" alt="${p.titleFlat}" loading="lazy">
         <img class="photo-mark" src="images/logo-mark.svg" alt="" loading="lazy">
@@ -119,6 +129,8 @@ function renderWorks(key) {
       `;
       item.addEventListener("click", () => openOverlay(key, i));
       rowEl.appendChild(item);
+      if (REDUCED) item.classList.add("in");
+      else workIO.observe(item);
     });
 
     grid.appendChild(rowEl);
@@ -134,25 +146,36 @@ window.addEventListener("resize", () => {
   resizeTimer = setTimeout(() => renderWorks(current), 200);
 });
 
-/* ─── Switch Collection (+ theme) ───────────────────────────────────────── */
+/* ─── Switch Collection (+ theme) ───────────────────────────────────────────
+   A full-screen wipe in the *target* theme slides up, the theme + grid swap
+   underneath, then the wipe exits upward — a clean editorial scene change. */
+let switching = false;
 function switchCollection(key) {
-  if (key === current) return;
+  if (key === current || switching) return;
   current = key;
-
-  document.body.classList.toggle("mono", key === "mono");
 
   document.querySelectorAll(".switch-btn").forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.key === key);
   });
 
-  // brief fade so the new images don't pop in mid-theme-transition
-  const grid = document.querySelector(".works");
-  grid.style.opacity = "0";
-  grid.style.transition = "opacity 0.35s ease";
-  setTimeout(() => {
+  if (REDUCED) {
+    document.body.classList.toggle("mono", key === "mono");
     renderWorks(key);
-    requestAnimationFrame(() => (grid.style.opacity = "1"));
-  }, 300);
+    return;
+  }
+
+  switching = true;
+  const wipe = document.getElementById("wipe");
+  wipe.querySelector(".wipe-name").textContent = collections[key].name;
+  wipe.classList.toggle("light", key === "color");
+  wipe.classList.add("in");
+
+  setTimeout(() => {
+    document.body.classList.toggle("mono", key === "mono");
+    renderWorks(key);
+    wipe.classList.add("out");
+    setTimeout(() => { wipe.classList.remove("in", "out"); switching = false; }, 700);
+  }, 640);
 }
 
 /* ─── Film-roll reveal ───────────────────────────────────────────────────────
@@ -215,6 +238,7 @@ document.addEventListener("dragstart", (e) => {
 
 /* ─── Project Overlay ───────────────────────────────────────────────────── */
 const overlay = document.getElementById("overlay");
+let overlayState = null; // { key, idx } while the overlay is open
 
 function openOverlay(key, idx) {
   const col = collections[key];
@@ -223,7 +247,10 @@ function openOverlay(key, idx) {
 
   const total = col.photos.length;
   const nextIdx = (idx + 1) % total;
+  const prevIdx = (idx - 1 + total) % total;
   const next = col.photos[nextIdx];
+  const prev = col.photos[prevIdx];
+  overlayState = { key, idx };
 
   overlay.innerHTML = `
     <nav class="overlay-nav">
@@ -233,7 +260,7 @@ function openOverlay(key, idx) {
     <div class="overlay-hero">
       <div class="overlay-hero-image" id="overlay-hero-image"></div>
       <div class="overlay-hero-text">
-        <div class="overlay-num">${String(idx + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}</div>
+        <div class="overlay-num"><em>${String(idx + 1).padStart(2, "0")}</em> / ${String(total).padStart(2, "0")}</div>
         <div class="overlay-title">${p.title.replace("\n", "<br>")}</div>
         <div class="overlay-divider"></div>
         <p class="overlay-desc">${p.desc}</p>
@@ -245,8 +272,9 @@ function openOverlay(key, idx) {
       </div>
     </div>
     <div class="overlay-footer">
-      <span class="label">Next Photo</span>
-      <button class="overlay-next" onclick="openOverlay('${key}', ${nextIdx})">${next.titleFlat} →</button>
+      <button class="overlay-step" onclick="openOverlay('${key}', ${prevIdx})">← ${prev.titleFlat}</button>
+      <span class="overlay-count"><em>${String(idx + 1).padStart(2, "0")}</em> / ${String(total).padStart(2, "0")}</span>
+      <button class="overlay-step" onclick="openOverlay('${key}', ${nextIdx})">${next.titleFlat} →</button>
     </div>
   `;
 
@@ -261,9 +289,17 @@ function openOverlay(key, idx) {
 
 function closeOverlay() {
   overlay.classList.remove("open");
+  overlayState = null;
   document.body.style.overflow = "";
 }
-document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeOverlay(); });
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") { closeOverlay(); return; }
+  // arrow keys step through photos while the overlay is open (book has its own)
+  if (!overlayState || !overlay.classList.contains("open") || bookEl.classList.contains("open")) return;
+  const total = collections[overlayState.key].photos.length;
+  if (e.key === "ArrowRight") openOverlay(overlayState.key, (overlayState.idx + 1) % total);
+  else if (e.key === "ArrowLeft") openOverlay(overlayState.key, (overlayState.idx - 1 + total) % total);
+});
 
 /* ─── Scroll reveal ─────────────────────────────────────────────────────── */
 const observer = new IntersectionObserver(
@@ -479,6 +515,37 @@ function initGalleryCursor() {
   document.addEventListener("click", () => cursor.classList.remove("show"));
 }
 
+/* ─── Hero motion: content drifts up & fades as you scroll past it ──────── */
+function initHeroMotion() {
+  if (REDUCED) return;
+  const content = document.querySelector(".hero-content");
+  const meta = document.querySelector(".hero-meta-top");
+  const side = document.querySelector(".hero-side");
+  let raf = null;
+  window.addEventListener("scroll", () => {
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+      const y = Math.min(window.scrollY, window.innerHeight);
+      const f = Math.max(0, 1 - y / (window.innerHeight * 0.85));
+      content.style.opacity = f;
+      content.style.transform = `translateY(${y * -0.08}px)`;
+      if (meta) meta.style.opacity = f;
+      if (side) side.style.opacity = f;
+      raf = null;
+    });
+  }, { passive: true });
+}
+
+/* ─── Local time (Belgium) in the footer ────────────────────────────────── */
+function initClock() {
+  const el = document.getElementById("local-time");
+  if (!el) return;
+  const fmt = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Brussels", hour: "2-digit", minute: "2-digit" });
+  const tick = () => { el.textContent = fmt.format(new Date()); };
+  tick();
+  setInterval(tick, 30000);
+}
+
 /* ─── Init ──────────────────────────────────────────────────────────────── */
 document.addEventListener("DOMContentLoaded", () => {
   normalizeCollections();
@@ -489,6 +556,18 @@ document.addEventListener("DOMContentLoaded", () => {
   renderWorks(current);
   observeReveal();
   initGalleryCursor();
+  initHeroMotion();
+  initClock();
+
+  // choreographed first paint: hero lines rise once the intro has slid away
+  const introEl = document.getElementById("intro");
+  const introSkipped = !introEl || introEl.classList.contains("skip");
+  setTimeout(() => document.body.classList.add("loaded"), introSkipped ? 120 : 1500);
+
+  // back to top
+  document.getElementById("back-top")?.addEventListener("click", () =>
+    window.scrollTo({ top: 0, behavior: REDUCED ? "auto" : "smooth" })
+  );
 
   // Mobile menu toggle
   const navToggle = document.getElementById("nav-toggle");

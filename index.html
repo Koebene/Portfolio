@@ -23,7 +23,7 @@
   <meta name="theme-color" content="#0B0B0C">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600&family=Pinyon+Script&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@1,400;1,500;1,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -49,6 +49,10 @@
     })();
   </script>
 
+  <!-- ─── Film grain + collection wipe ───────────────────────────────── -->
+  <div class="grain" aria-hidden="true"></div>
+  <div id="wipe" class="wipe" aria-hidden="true"><span class="wipe-name"></span></div>
+
   <!-- ─── Nav ─────────────────────────────────────────────────────────── -->
   <nav>
     <span class="nav-logo"><img class="logo-sig" src="images/logo-mark.svg" alt="Ruben Van Ruysseveldt — Photography"></span>
@@ -72,8 +76,13 @@
       <span>Photographer — Visual Artist</span>
       <span>Portfolio / 2021 — 2025</span>
     </div>
+    <span class="hero-side">35 MM&ensp;—&ensp;f / 1.4&ensp;—&ensp;Belgium</span>
     <div class="hero-content">
-      <h1 class="hero-title">PHOTO<span class="thin">GRAPHY</span></h1>
+      <p class="hero-kicker">Photography — a personal collection</p>
+      <h1 class="hero-title">
+        <span class="line-mask"><span class="line-in">Ruben <em class="ital">van</em></span></span>
+        <span class="line-mask"><span class="line-in">Ruysseveldt</span></span>
+      </h1>
       <div class="hero-bottom">
         <div class="hero-quote">
           <p class="hero-desc">
@@ -97,13 +106,13 @@
     <div class="switch">
       <button class="switch-btn active" data-key="mono">
         <span class="dot"></span>
-        <span class="switch-index">01 — Collection</span>
+        <span class="switch-index"><em>01</em> — Collection</span>
         <span class="switch-name">Monochrome</span>
         <span class="switch-sub">Black &amp; white — light, form &amp; stillness</span>
       </button>
       <button class="switch-btn" data-key="color">
         <span class="dot"></span>
-        <span class="switch-index">02 — Collection</span>
+        <span class="switch-index"><em>02</em> — Collection</span>
         <span class="switch-name">Chroma</span>
         <span class="switch-sub">Colour — saturated, warm &amp; alive</span>
       </button>
@@ -123,7 +132,8 @@
   <!-- ─── About ─────────────────────────────────────────────────────────── -->
   <section class="about reveal" id="about">
     <div class="about-text">
-      <h2 class="about-heading">About<br>The Work</h2>
+      <h2 class="about-heading">About<br><em class="ital">the</em> Work</h2>
+      <p class="about-pull">&ldquo;A slower, sharper way of looking at the world.&rdquo;</p>
       <p class="about-body">
         I&rsquo;m Ruben Van Ruysseveldt, a photographer based in Belgium. This is
         a personal space &mdash; built to share my work with myself and with the
@@ -152,7 +162,7 @@
   <!-- ─── Contact ─────────────────────────────────────────────────────────── -->
   <section class="contact reveal" id="contact">
     <div class="contact-left">
-      <h2 class="contact-heading">Say<br>Hello</h2>
+      <h2 class="contact-heading">Say<br><em class="ital">hello</em></h2>
       <p class="contact-sub">This isn&rsquo;t a shop window &mdash; just a place to share what I see. If something here resonates, find me on Instagram.</p>
       <a class="contact-email" href="https://www.instagram.com/rubenvanruysseveldt/" target="_blank" rel="noopener">@rubenvanruysseveldt</a>
     </div>
@@ -166,7 +176,8 @@
   <!-- ─── Footer ─────────────────────────────────────────────────────────── -->
   <footer>
     <span class="footer-copy">© 2025 Ruben Van Ruysseveldt</span>
-    <span class="footer-right">Film &amp; Digital — Belgium</span>
+    <span class="footer-time">Belgium — <span id="local-time">--:--</span></span>
+    <button class="footer-top" id="back-top">Back to top ↑</button>
   </footer>
 
   <!-- ─── Project Overlay ─────────────────────────────────────────────────── -->
