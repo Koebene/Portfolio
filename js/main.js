@@ -116,8 +116,12 @@ function renderWorks(key) {
       item.style.flexGrow = p._ar;          // width proportional to aspect ratio
       item.style.flexBasis = "0";
       item.style.transitionDelay = ci * 90 + "ms"; // stagger within the row
+      // expose each photo as a real, keyboard-operable control
+      item.setAttribute("role", "button");
+      item.setAttribute("tabindex", "0");
+      item.setAttribute("aria-label", `${p.titleFlat} — ${p.cat}, ${p.date}. Open photograph.`);
       item.innerHTML = `
-        <img src="${p.src}" alt="${p.titleFlat}" loading="lazy">
+        <img src="${p.src}" alt="" loading="lazy" decoding="async">
         <img class="photo-mark" src="images/logo-watermark.svg" alt="" loading="lazy">
         <div class="work-overlay">
           <span class="work-num">${String(i + 1).padStart(2, "0")}</span>
@@ -127,7 +131,11 @@ function renderWorks(key) {
           </div>
         </div>
       `;
-      item.addEventListener("click", () => openOverlay(key, i));
+      const openThis = () => openOverlay(key, i);
+      item.addEventListener("click", openThis);
+      item.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openThis(); }
+      });
       rowEl.appendChild(item);
       if (REDUCED) item.classList.add("in");
       else workIO.observe(item);
@@ -203,6 +211,9 @@ function buildFilmReveal(container, src) {
   finalImg.alt = "";
   container.appendChild(finalImg);
 
+  // Reduced motion: skip the whole film animation, just show the photo.
+  if (REDUCED) { finalImg.classList.add("show"); return; }
+
   const reveal = document.createElement("div");
   reveal.className = "film-reveal";
 
@@ -244,14 +255,33 @@ document.addEventListener("dragstart", (e) => {
   if (e.target.tagName === "IMG") e.preventDefault();
 });
 
+/* ─── Modal focus management (shared by overlay + book) ─────────────────────
+   While a dialog is open, make the rest of the page `inert` so keyboard focus
+   and screen readers stay inside it, and restore focus to the trigger on close. */
+function pageChrome() {
+  return [
+    document.querySelector(".skip-link"),
+    document.querySelector("nav"),
+    document.getElementById("main"),
+    document.querySelector("footer"),
+  ];
+}
+function setChromeInert(on) {
+  pageChrome().forEach((el) => { if (el) el.inert = on; });
+}
+
 /* ─── Project Overlay ───────────────────────────────────────────────────── */
 const overlay = document.getElementById("overlay");
-let overlayState = null; // { key, idx } while the overlay is open
+let overlayState = null;       // { key, idx } while the overlay is open
+let overlayReturnFocus = null; // element to refocus when it closes
 
 function openOverlay(key, idx) {
   const col = collections[key];
   const p = col.photos[idx];
   if (!p) return;
+
+  const wasOpen = overlay.classList.contains("open");
+  if (!wasOpen) overlayReturnFocus = document.activeElement;
 
   const total = col.photos.length;
   const nextIdx = (idx + 1) % total;
@@ -291,14 +321,24 @@ function openOverlay(key, idx) {
   heroImageEl.insertAdjacentHTML("beforeend",
     '<img class="photo-mark" src="images/logo-watermark.svg" alt="">');
   overlay.scrollTop = 0;
-  requestAnimationFrame(() => overlay.classList.add("open"));
+  overlay.setAttribute("aria-hidden", "false");
+  if (!wasOpen) setChromeInert(true);
   document.body.style.overflow = "hidden";
+  requestAnimationFrame(() => {
+    overlay.classList.add("open");
+    overlay.querySelector(".overlay-close")?.focus();
+  });
 }
 
 function closeOverlay() {
+  if (!overlay.classList.contains("open")) return;
   overlay.classList.remove("open");
+  overlay.setAttribute("aria-hidden", "true");
   overlayState = null;
   document.body.style.overflow = "";
+  setChromeInert(false);
+  if (overlayReturnFocus && overlayReturnFocus.focus) overlayReturnFocus.focus();
+  overlayReturnFocus = null;
 }
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") { closeOverlay(); return; }
@@ -455,16 +495,28 @@ function updateBookUI() {
   bookNextBtn.disabled = bookIndex === total - 1;
 }
 
+let bookReturnFocus = null;
 function openBook() {
+  bookReturnFocus = document.activeElement;
   buildBook(current);
   renderSpread(0);
-  requestAnimationFrame(() => bookEl.classList.add("open"));
+  bookEl.setAttribute("aria-hidden", "false");
+  setChromeInert(true);
   document.body.style.overflow = "hidden";
+  requestAnimationFrame(() => {
+    bookEl.classList.add("open");
+    document.querySelector(".book-close")?.focus();
+  });
 }
 
 function closeBook() {
+  if (!bookEl.classList.contains("open")) return;
   bookEl.classList.remove("open");
+  bookEl.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
+  setChromeInert(false);
+  if (bookReturnFocus && bookReturnFocus.focus) bookReturnFocus.focus();
+  bookReturnFocus = null;
 }
 
 function turnPage(dir) {
@@ -611,6 +663,10 @@ document.addEventListener("DOMContentLoaded", () => {
   initGalleryCursor();
   initHeroMotion();
   initClock();
+
+  // keep the footer copyright year current
+  const yearEl = document.getElementById("year");
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
 
   // choreographed first paint: hero lines rise once the intro has slid away
   const introEl = document.getElementById("intro");

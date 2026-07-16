@@ -18,6 +18,7 @@
   <meta name="twitter:description" content="A personal photography portfolio — film & digital, made in Belgium for the love of it.">
   <meta name="twitter:image" content="https://portfolio-mu-eight-vqpou60so0.vercel.app/images/share.jpg">
 
+  <link rel="canonical" href="https://portfolio-mu-eight-vqpou60so0.vercel.app/">
   <link rel="preload" as="image" href="images/hero.jpeg">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="favicon.svg">
@@ -26,8 +27,36 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@1,400;1,500;1,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+
+  <!-- Structured data for search engines / rich results -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Ruben Van Ruysseveldt",
+    "url": "https://portfolio-mu-eight-vqpou60so0.vercel.app/",
+    "jobTitle": "Photographer",
+    "nationality": "Belgian",
+    "image": "https://portfolio-mu-eight-vqpou60so0.vercel.app/images/about-portrait.jpeg",
+    "sameAs": ["https://www.instagram.com/rubenvanruysseveldt/"],
+    "knowsAbout": ["Film Photography", "Black & White Photography", "Documentary Photography"]
+  }
+  </script>
+
+  <!-- Progressive-enhancement fallback: if JS is unavailable, the reveal-on-scroll
+       animations never run, so neutralise the hidden start states and skip the intro. -->
+  <noscript>
+    <style>
+      #intro { display: none !important; }
+      .reveal, .work-item { opacity: 1 !important; transform: none !important; clip-path: none !important; }
+      .hero .line-in { transform: none !important; }
+      .hero-kicker, .hero-bottom, .hero-meta-top, .hero-side { opacity: 1 !important; transform: none !important; }
+    </style>
+  </noscript>
 </head>
 <body>
+
+  <a class="skip-link" href="#work">Skip to work</a>
 
   <!-- ─── Intro ───────────────────────────────────────────────────────── -->
   <div id="intro">
@@ -72,6 +101,8 @@
       <li><a href="#contact">Contact</a></li>
     </ul>
   </nav>
+
+  <main id="main">
 
   <!-- ─── Hero ─────────────────────────────────────────────────────────── -->
   <header class="hero">
@@ -196,18 +227,20 @@
     <span class="label">Made for the love of it — Belgium</span>
   </div>
 
+  </main>
+
   <!-- ─── Footer ─────────────────────────────────────────────────────────── -->
   <footer>
-    <span class="footer-copy">© 2025 Ruben Van Ruysseveldt</span>
+    <span class="footer-copy">© <span id="year">2025</span> Ruben Van Ruysseveldt</span>
     <span class="footer-time">Belgium — <span id="local-time">--:--</span></span>
     <button class="footer-top" id="back-top">Back to top ↑</button>
   </footer>
 
   <!-- ─── Project Overlay ─────────────────────────────────────────────────── -->
-  <div id="overlay" class="overlay"></div>
+  <div id="overlay" class="overlay" role="dialog" aria-modal="true" aria-label="Photograph detail" aria-hidden="true"></div>
 
   <!-- ─── Book Mode ───────────────────────────────────────────────────────── -->
-  <div id="book" class="book-overlay">
+  <div id="book" class="book-overlay" role="dialog" aria-modal="true" aria-label="Photo book" aria-hidden="true">
     <div class="book-topbar">
       <span class="label book-crumb"></span>
       <button class="book-close" onclick="closeBook()">Close ✕</button>

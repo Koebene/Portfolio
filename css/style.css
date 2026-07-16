@@ -62,6 +62,36 @@ button { font-family: inherit; cursor: pointer; background: none; border: none; 
 ::selection { background: var(--fg); color: var(--bg); }
 html { scrollbar-width: thin; scrollbar-color: var(--muted) transparent; }
 
+/* ─── Accessibility ─────────────────────────────────────────────────────── */
+/* Skip link — hidden until focused, then pinned top-left over everything */
+.skip-link {
+  position: fixed;
+  top: 12px; left: 12px;
+  z-index: 1200;
+  padding: 12px 18px;
+  background: var(--fg);
+  color: var(--bg);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  transform: translateY(-160%);
+  transition: transform 0.25s var(--ease);
+}
+.skip-link:focus { transform: none; outline: none; }
+
+/* Visible focus ring for keyboard users only (never on mouse click) */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 1px;
+}
+/* over dark photos the accent may be low-contrast — use the fg/theme ink there */
+.work-item:focus-visible,
+.book-arrow:focus-visible,
+.nav-links a:focus-visible { outline-color: currentColor; }
+body.mono :focus-visible { outline-color: #F4F3EF; }
+
 /* ─── Film grain — a quiet analog texture over everything ──────────────── */
 /* A tiled noise tile that jitters by a few px. Kept ~viewport-sized (inset
    slightly beyond the edges so the shift never exposes a seam) rather than a
@@ -855,6 +885,10 @@ body.has-cursor .work-item img { cursor: none; }
   .work-item { opacity: 1; clip-path: none; transition: none; }
   .work-item img { transform: none; }
   .wipe { display: none; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .hero-img img { animation: none; transform: none; }
+  .hero-scroll .line::after { animation: none; }
+  html { scroll-behavior: auto; }
 }
 
 .overlay-gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); }
