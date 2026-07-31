@@ -291,10 +291,10 @@ function openOverlay(key, idx) {
   overlayState = { key, idx };
 
   overlay.innerHTML = `
-    <nav class="overlay-nav">
+    <div class="overlay-nav">
       <span class="label">${col.name} / ${p.titleFlat}</span>
       <button class="overlay-close" onclick="closeOverlay()">Close ✕</button>
-    </nav>
+    </div>
     <div class="overlay-hero">
       <div class="overlay-hero-image" id="overlay-hero-image"></div>
       <div class="overlay-hero-text">

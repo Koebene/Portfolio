@@ -12,7 +12,7 @@
 body {
   --bg:         #F3F1EA;
   --fg:         #111110;
-  --muted:      #9A968B;
+  --muted:      #8B8678;   /* nudged darker for legible metadata labels */
   --border:     #E0DDD3;
   --accent:     #C8502D;
   --img-filter: saturate(1.02) contrast(1.02);
@@ -22,7 +22,7 @@ body {
 body.mono {
   --bg:         #0B0B0C;
   --fg:         #F4F3EF;
-  --muted:      #6E6E6A;
+  --muted:      #7C7C77;   /* nudged lighter for legible metadata labels */
   --border:     #1F1F22;
   --accent:     #F4F3EF;
   --img-filter: grayscale(100%) contrast(1.05);
@@ -38,11 +38,19 @@ body {
   line-height: 1.6;
   overflow-x: hidden;
   transition: background 0.7s var(--ease), color 0.7s var(--ease);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 img { display: block; width: 100%; height: 100%; object-fit: cover; }
 a { color: inherit; text-decoration: none; }
 button { font-family: inherit; cursor: pointer; background: none; border: none; color: inherit; }
+
+/* Typographic polish — tidy line breaks where the browser supports it */
+.hero-desc, .about-body, .about-pull, .contact-sub,
+.overlay-desc, .book-desc, .book-cover-sub { text-wrap: pretty; }
+.about-heading, .contact-heading, .overlay-title, .book-title { text-wrap: balance; }
 
 .display {
   font-family: var(--font-display);
@@ -474,14 +482,16 @@ body.loaded .hero-meta-top, body.loaded .hero-side { opacity: 1; }
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  padding: 56px clamp(16px, 5vw, 96px) 28px;
+  /* same horizontal inset as the grid below, so the label lines up exactly
+     with the first column of photos at every width */
+  padding: 56px clamp(20px, 5vw, 72px) 28px;
 }
 
 .works {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: 8px clamp(18px, 5vw, 110px) 90px;
+  padding: 8px clamp(20px, 5vw, 72px) 90px;
 }
 
 .works-row { display: flex; width: 100%; gap: 20px; }
