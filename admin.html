@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Photo Admin — Ruben Van Ruysseveldt</title>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{--bg:#0f0f10;--panel:#17171a;--line:#2a2a2e;--fg:#f4f3ef;--muted:#8a8a86;--accent:#c8502d;--ok:#4caf7d}
@@ -27,6 +28,9 @@
     .btn-primary:hover{opacity:.85;background:var(--fg)}
     .btn-danger{border-color:#5a2a22;color:#e8927e}
     .btn-danger:hover{background:#3a1f1a}
+    button:disabled{opacity:.35;cursor:default}
+    button:disabled:hover{background:var(--panel)}
+    :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     #saved{font-size:11px;color:var(--ok);letter-spacing:.1em;opacity:0;transition:opacity .3s}
     #saved.show{opacity:1}
 
@@ -164,10 +168,10 @@
           <div class="field full"><label>Description</label><textarea rows="3" data-field="desc">${esc(p.desc||"")}</textarea></div>
           <div class="card-actions">
             <span class="src-label">${p.src ? esc(p.src) : "no file set"}</span>
-            <button data-action="up" ${i===0?"disabled":""}>↑</button>
-            <button data-action="down" ${i===total-1?"disabled":""}>↓</button>
-            <button data-action="move">→ ${esc(otherName)}</button>
-            <button data-action="del" class="btn-danger">Delete</button>
+            <button data-action="up" aria-label="Move up" title="Move up" ${i===0?"disabled":""}>↑</button>
+            <button data-action="down" aria-label="Move down" title="Move down" ${i===total-1?"disabled":""}>↓</button>
+            <button data-action="move" title="Move to the ${esc(otherName)} collection">→ ${esc(otherName)}</button>
+            <button data-action="del" class="btn-danger" aria-label="Delete photo">Delete</button>
           </div>
         </div>
       </div>`;

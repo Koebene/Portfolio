@@ -126,7 +126,7 @@ function renderWorks(key) {
         <div class="work-overlay">
           <span class="work-num">${String(i + 1).padStart(2, "0")}</span>
           <div class="work-info">
-            <div class="work-title">${p.title.replace("\n", "<br>")}</div>
+            <div class="work-title">${p.title.replace(/\n/g, "<br>")}</div>
             <div class="work-cat">${p.cat} — ${p.date}</div>
           </div>
         </div>
@@ -299,7 +299,7 @@ function openOverlay(key, idx) {
       <div class="overlay-hero-image" id="overlay-hero-image"></div>
       <div class="overlay-hero-text">
         <div class="overlay-num"><em>${String(idx + 1).padStart(2, "0")}</em> / ${String(total).padStart(2, "0")}</div>
-        <div class="overlay-title">${p.title.replace("\n", "<br>")}</div>
+        <div class="overlay-title">${p.title.replace(/\n/g, "<br>")}</div>
         <div class="overlay-divider"></div>
         <p class="overlay-desc">${p.desc}</p>
         <div class="overlay-fields">
@@ -434,7 +434,7 @@ const coverPage = (col) => `
 const detailPage = (p, idx, total, pageNo) => `
   <div class="page page-text">
     <div class="book-num">Plate ${String(idx + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}</div>
-    <h3 class="book-title">${p.title.replace("\n", "<br>")}</h3>
+    <h3 class="book-title">${p.title.replace(/\n/g, "<br>")}</h3>
     <div class="book-divider"></div>
     <p class="book-desc">${p.desc}</p>
     <div class="book-fields">
