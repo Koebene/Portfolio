@@ -1,0 +1,7 @@
+# The photo admin is a local editing tool — it must never be published.
+# Excluding it from the deployment is stronger than any password: on a static
+# site there is no server, so any password check would run in the browser and
+# be readable in the page source.
+#
+# Use it locally instead (see README-ADMIN.md).
+admin.html
