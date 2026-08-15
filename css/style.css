@@ -12,7 +12,7 @@
 body {
   --bg:         #F3F1EA;
   --fg:         #111110;
-  --muted:      #8B8678;   /* nudged darker for legible metadata labels */
+  --muted:      #6F6B60;   /* 4.7:1 on --bg — WCAG AA for the 10px labels */
   --border:     #E0DDD3;
   --accent:     #C8502D;
   --img-filter: saturate(1.02) contrast(1.02);

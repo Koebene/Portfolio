@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# The admin panel is a local editing tool, not part of the portfolio.
+Disallow: /admin.html
+
+Sitemap: https://portfolio-mu-eight-vqpou60so0.vercel.app/sitemap.xml
