@@ -98,6 +98,7 @@
 
   <main id="app"></main>
 
+  <script src="js/image-variants.js"></script>
   <script src="js/photos.js"></script>
   <script>
     const KEY = "rvr_photos_override";
@@ -142,9 +143,13 @@
     function esc(html){ return String(html).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
     function photoCard(coll, p, i, total){
+      // Thumbnails are 160px wide — load the small variant when one exists
+      // instead of the full-size master, so this page stays snappy.
       const thumbSrc = p._preview || p.src;
+      const variants = !p._preview && window.imageVariants && window.imageVariants[p.src];
+      const small = variants ? variants[0][1] : thumbSrc;
       const thumb = thumbSrc
-        ? `<img src="${esc(thumbSrc)}" alt="">`
+        ? `<img src="${esc(small)}" alt="">`
         : `<div class="empty">No image yet —<br>pick a file below</div>`;
       const other = coll === "mono" ? "color" : "mono";
       const otherName = state[other].name;

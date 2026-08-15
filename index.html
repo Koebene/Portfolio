@@ -19,7 +19,11 @@
   <meta name="twitter:image" content="https://portfolio-mu-eight-vqpou60so0.vercel.app/images/share.jpg">
 
   <link rel="canonical" href="https://portfolio-mu-eight-vqpou60so0.vercel.app/">
-  <link rel="preload" as="image" href="images/hero.jpeg">
+  <!-- Preload must offer the same candidates as the <img>, otherwise a phone
+       preloads the large file and then downloads the small one as well. -->
+  <link rel="preload" as="image" href="images/hero.jpeg"
+        imagesrcset="images/hero-800.jpeg 800w, images/hero.jpeg 1493w"
+        imagesizes="100vw">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="favicon.svg">
   <meta name="theme-color" content="#0B0B0C">
@@ -107,7 +111,10 @@
   <!-- ─── Hero ─────────────────────────────────────────────────────────── -->
   <header class="hero">
     <div class="hero-img">
-      <img src="images/hero.jpeg" alt="Featured photograph — black & white portrait">
+      <img src="images/hero.jpeg"
+           srcset="images/hero-800.jpeg 800w, images/hero.jpeg 1493w"
+           sizes="100vw"
+           alt="Featured photograph — black & white portrait">
     </div>
     <div class="hero-meta-top">
       <span>Photographer — Visual Artist</span>
@@ -193,7 +200,10 @@
       </div>
     </div>
     <div class="about-image">
-      <img src="images/about-portrait.jpeg" alt="Ruben Van Ruysseveldt behind a Canon FTb film camera">
+      <img src="images/about-portrait.jpeg"
+           srcset="images/about-portrait-800.jpeg 800w, images/about-portrait.jpeg 1267w"
+           sizes="(max-width: 820px) 100vw, 50vw"
+           alt="Ruben Van Ruysseveldt behind a Canon FTb film camera">
     </div>
   </section>
 
@@ -251,6 +261,7 @@
     </div>
   </div>
 
+  <script src="js/image-variants.js"></script>
   <script src="js/photos.js"></script>
   <script src="js/main.js"></script>
 </body>

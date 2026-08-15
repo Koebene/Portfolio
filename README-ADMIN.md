@@ -40,3 +40,18 @@ git add -A && git commit -m "Nieuwe foto's" && git push
 ```
 
 Nieuwe afbeeldingsbestanden moeten altijd zelf in de map `images/` gezet worden.
+
+## Na het toevoegen van nieuwe foto's
+
+Draai dit één keer, zodat telefoons een kleinere versie krijgen in plaats van het
+volledige bestand:
+
+```bash
+python tools/build-image-variants.py
+```
+
+Het maakt automatisch kleinere kopieën (800 en 1600 pixels breed) en werkt
+`js/image-variants.js` bij. Vergeet niet die bestanden mee te committen.
+
+Sla je dit over? Dan werkt de site gewoon — de nieuwe foto wordt dan alleen op
+volledige grootte geladen.

@@ -36,6 +36,29 @@ function getAR(p) {
   return p.ar && p.ar > 0 ? p.ar : 1;
 }
 
+/* ─── Responsive images ──────────────────────────────────────────────────────
+   tools/build-image-variants.py writes js/image-variants.js, listing the widths
+   available for each photo. We hand those to the browser as a srcset so a phone
+   downloads an 800px file instead of the 2560px master — same visible sharpness,
+   a fraction of the data. A photo missing from the manifest (e.g. just added and
+   the script not run yet) simply renders from its plain src.
+   `sizes` describes how wide the photo will actually be shown. */
+function imgSrcset(src) {
+  const v = window.imageVariants && window.imageVariants[src];
+  if (!v || v.length < 2) return "";
+  return v.map(([w, path]) => `${path} ${w}w`).join(", ");
+}
+
+/* Build the srcset/sizes attribute pair for an <img> in HTML strings. */
+function imgAttrs(src, sizes) {
+  const set = imgSrcset(src);
+  return set ? ` srcset="${set}" sizes="${sizes}"` : "";
+}
+
+const SIZES_GRID    = "(max-width: 820px) 100vw, 50vw";
+const SIZES_OVERLAY = "(max-width: 820px) 100vw, 55vw";
+const SIZES_BOOK    = "(max-width: 820px) 94vw, min(590px, 46vw)";
+
 /* Seeded RNG (mulberry32) — deterministic "randomness" so the arrangement
    stays stable across resizes and collection switches within one visit. */
 function mulberry32(a) {
@@ -145,7 +168,7 @@ function renderWorks(key) {
       item.setAttribute("tabindex", "0");
       item.setAttribute("aria-label", `${p.titleFlat} — ${p.cat}, ${p.date}. Open photograph.`);
       item.innerHTML = `
-        <img src="${p.src}" alt="" loading="lazy" decoding="async">
+        <img src="${p.src}"${imgAttrs(p.src, SIZES_GRID)} alt="" loading="lazy" decoding="async">
         <img class="photo-mark" src="images/logo-watermark.svg" alt="" loading="lazy">
         <div class="work-overlay">
           <span class="work-num">${String(i + 1).padStart(2, "0")}</span>
@@ -229,9 +252,13 @@ function buildFilmReveal(container, src) {
   container.innerHTML = "";
 
   // The clean, seamless final image (hidden until the frames settle).
+  // The strips below reuse the exact same srcset/sizes, so they resolve to the
+  // same file and share one download instead of fetching a second size.
+  const setAttr = imgSrcset(src);
   const finalImg = document.createElement("img");
   finalImg.className = "film-final";
   finalImg.src = src;
+  if (setAttr) { finalImg.srcset = setAttr; finalImg.sizes = SIZES_OVERLAY; }
   finalImg.alt = "";
   container.appendChild(finalImg);
 
@@ -252,7 +279,7 @@ function buildFilmReveal(container, src) {
     inner.className = "film-inner";
     inner.style.width = N * 100 + "%";
     inner.style.left = -i * 100 + "%";
-    inner.innerHTML = `<img src="${src}" alt="">`;
+    inner.innerHTML = `<img src="${src}"${imgAttrs(src, SIZES_OVERLAY)} alt="">`;
 
     strip.appendChild(inner);
     reveal.appendChild(strip);
@@ -449,7 +476,7 @@ let bookIndex   = 0;
 let bookFlipping = false;
 
 const photoPage = (src, pageNo) =>
-  `<div class="page page-photo"><img src="${src}" alt="" loading="lazy">
+  `<div class="page page-photo"><img src="${src}"${imgAttrs(src, SIZES_BOOK)} alt="" loading="lazy">
    ${pageNo ? `<span class="book-pageno left">${pageNo}</span>` : ""}</div>`;
 
 const coverPage = (col) => `
