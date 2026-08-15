@@ -340,9 +340,14 @@ function openOverlay(key, idx) {
     </div>
   `;
 
+  // Build inside a frame that shrink-wraps the photograph, so the watermark
+  // always sits on the picture and never on the letterbox band beside it.
   const heroImageEl = document.getElementById("overlay-hero-image");
-  buildFilmReveal(heroImageEl, p.src);
-  heroImageEl.insertAdjacentHTML("beforeend",
+  const frame = document.createElement("div");
+  frame.className = "photo-frame";
+  heroImageEl.appendChild(frame);
+  buildFilmReveal(frame, p.src);
+  frame.insertAdjacentHTML("beforeend",
     '<img class="photo-mark" src="images/logo-watermark.svg" alt="">');
   overlay.scrollTop = 0;
   overlay.setAttribute("aria-hidden", "false");
