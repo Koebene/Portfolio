@@ -132,6 +132,15 @@ window.collections = {
         ar:    1.39,
         desc:  "Two metal chairs wait beneath an old olive tree, turned just slightly toward one another as if caught mid-conversation. No one is here, and yet the scene feels full — of everyone who has sat, talked and drifted away. An empty seat is never quite empty; it keeps the shape of the company it has known.",
       },
+      {
+        title: "ALL NEW\nSOUNDS",
+        src:   "images/visions.jpeg",
+        date:  "2026",
+        cat:   "Street",
+        loc:   "Ardèche, FR",
+        ar:    0.66,
+        desc:  "A stranger walks ahead in the flattening light of a summer afternoon, carrying a promise on his back that nobody on the street can hear. The façade behind him burns almost to white. There is something funny and a little wistful in a slogan like that, worn casually, walking away from you — all that anticipation, going somewhere else.",
+      },
 
     ],
   },
@@ -267,6 +276,15 @@ window.collections = {
         loc:   "Ardèche, FR",
         ar:    1.50,
         desc:  "A stream picks its way through a jumble of boulders, each one upholstered in moss so thick the rock beneath feels like a rumour. Water finds the gaps, the light finds the water, and the whole ravine hums with the particular green quiet of a place that is always, softly, wet.",
+      },
+      {
+        title: "THE\nVISITOR",
+        src:   "images/sunflower.jpeg",
+        date:  "2026",
+        cat:   "Nature",
+        loc:   "Ardèche, FR",
+        ar:    1.50,
+        desc:  "Up close a sunflower stops being a flower and becomes a landscape — a thousand tight spirals of florets packed under a hard blue sky. Somewhere near the middle a bumblebee works its way through, entirely indifferent to the geometry, following the sugar. High summer, doing exactly what it was built to do.",
       },
 
     ],

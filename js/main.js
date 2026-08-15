@@ -37,7 +37,7 @@ function getAR(p) {
 }
 
 /* Seeded RNG (mulberry32) — deterministic "randomness" so the arrangement
-   looks varied but stays stable across resizes and reloads. */
+   stays stable across resizes and collection switches within one visit. */
 function mulberry32(a) {
   return function () {
     a |= 0; a = (a + 0x6d2b79f5) | 0;
@@ -45,6 +45,25 @@ function mulberry32(a) {
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
+}
+
+/* Fisher–Yates shuffle, in place. */
+function shuffle(arr, rand) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+/* A fresh hang on every visit: each collection's photos are shuffled and the
+   row-height rhythm is re-seeded once at load, then held for the rest of the
+   session — so resizing or switching collections never reshuffles the wall
+   under the visitor, but a reload always gives a different arrangement. */
+function shuffleCollections() {
+  Object.values(collections).forEach((col) => {
+    shuffle(col.photos, Math.random);
+  });
 }
 
 /* Group items into rows of varying height — a justified gallery that leaves
@@ -76,7 +95,12 @@ function buildRows(items, W, seed, gap) {
   return rows;
 }
 
-const SEED = { mono: 7, color: 23 };
+/* Re-seeded per page load (see shuffleCollections) so the row rhythm changes
+   too — but read from here on every re-render, so resizes stay consistent. */
+const SEED = {
+  mono:  (Math.random() * 1e9) | 0,
+  color: (Math.random() * 1e9) | 0,
+};
 
 /* Reveal gallery photos as they scroll into view (clip + scale settle). */
 const workIO = new IntersectionObserver(
@@ -652,6 +676,7 @@ function initClock() {
 
 /* ─── Init ──────────────────────────────────────────────────────────────── */
 document.addEventListener("DOMContentLoaded", () => {
+  shuffleCollections();                // a different hang on every visit
   normalizeCollections();
   document.body.classList.add("mono"); // start in monochrome
   updateNav();                         // sync nav ink to the starting theme
