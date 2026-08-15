@@ -568,37 +568,13 @@ body:not(.mono) .work-item:hover img { filter: saturate(1.1) contrast(1.03); }
   width: clamp(84px, 9.5vw, 124px); height: auto; opacity: 0.6;
 }
 
-/* ─── Marquee — slow editorial ticker between sections ──────────────────── */
-.marquee { overflow: hidden; padding: 34px 0 38px; }
-.marquee-track {
-  display: flex;
-  width: max-content;
-  animation: marqueeScroll 38s linear infinite;
-}
-.marquee-track span {
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  white-space: nowrap;
-  font-size: clamp(44px, 6vw, 92px);
-  line-height: 1;
-  color: var(--muted);
-  opacity: 0.4;
-}
-@supports (-webkit-text-stroke: 1px black) {
-  .marquee-track span {
-    color: transparent;
-    -webkit-text-stroke: 1px var(--muted);
-    opacity: 0.8;
-  }
-}
-@keyframes marqueeScroll { to { transform: translateX(-50%); } }
-
 /* ─── About ─────────────────────────────────────────────────────────────── */
 .about {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  /* no border-top: .collections already closes with a border-bottom directly
+     above, and two adjacent hairlines read as one thick 2px rule */
   border-bottom: 1px solid var(--border);
-  border-top: 1px solid var(--border);
   min-height: 540px;
 }
 .about-text {
@@ -889,7 +865,6 @@ body.has-cursor .work-item img { cursor: none; }
 @media (prefers-reduced-motion: reduce) {
   #intro { animation-delay: 0.4s; }
   .grain { animation: none; }
-  .marquee-track { animation: none; }
   .line-in, .hero-kicker, .hero-bottom, .hero-meta-top, .hero-side { transform: none; opacity: 1; transition: none; }
   .hero-side { transform: translateY(-50%); }
   .work-item { opacity: 1; clip-path: none; transition: none; }
