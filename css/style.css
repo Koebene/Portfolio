@@ -728,12 +728,13 @@ footer {
 }
 
 /* the seamless final image — also the element that gives .photo-frame its size,
-   so the frame always matches the photograph's real proportions */
+   so the frame always matches the photograph's real proportions. The viewport
+   cap keeps even a tall portrait fully visible without scrolling. */
 .photo-frame .film-final {
   position: static;
   display: block;
   width: auto; height: auto;
-  max-width: 100%; max-height: 100%;
+  max-width: 100%; max-height: 88vh;
 }
 
 .film-final {
@@ -943,7 +944,12 @@ body.has-cursor .work-item img { cursor: none; }
   .contact-right { align-items: flex-start; }
 
   .overlay-hero { grid-template-columns: 1fr; min-height: auto; }
-  .overlay-hero-image { height: 70vw; }
+  /* Let the photo decide the height instead of forcing a short, wide box —
+     a fixed height cropped portrait photographs in half. The image is capped
+     in viewport units (not a percentage, which would not resolve against an
+     auto-height parent) so even very tall frames stay on one screen. */
+  .overlay-hero-image { height: auto; }
+  .photo-frame .film-final { max-height: 72vh; }
   .overlay-hero-text { border-left: none; padding: 36px 24px; }
   .overlay-fields { grid-template-columns: 1fr 1fr; }
   .overlay-gallery { grid-template-columns: 1fr; }
