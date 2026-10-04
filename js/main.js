@@ -93,11 +93,21 @@ function shuffleCollections() {
    room around each photo. Taller target heights mean fewer, larger photos per
    row; `gap` is the breathing space between them (and is kept out of the maths
    so rows still line up edge to edge within the padded container). */
-function buildRows(items, W, seed, gap) {
+function buildRows(items, W, seed, gap, single) {
+  // Phones: one photo per row at full width, so every frame reads at a real
+  // size instead of as a narrow two-up tile. Very tall frames are capped to
+  // most of the screen height so one photo never needs more than a scroll.
+  if (single) {
+    const cap = window.innerHeight * 0.82;
+    return items.map((it) => {
+      const h = Math.min(W / it._ar, cap);
+      return { items: [it], h, w: h * it._ar, single: true };
+    });
+  }
+
   const rand = mulberry32(seed);
-  const isMobile = W < 720;
-  const minH = isMobile ? 340 : 500;
-  const maxH = isMobile ? 540 : 760;
+  const minH = 500;
+  const maxH = 760;
 
   const rows = [];
   let row = [], arSum = 0;
@@ -117,6 +127,9 @@ function buildRows(items, W, seed, gap) {
   if (row.length) rows.push({ items: row, h: Math.min(rowHeight(row.length, arSum), maxH) });
   return rows;
 }
+
+/* Same breakpoint as the CSS: at or below it the gallery is a single column. */
+const SINGLE_COLUMN = window.matchMedia("(max-width: 820px)");
 
 /* Re-seeded per page load (see shuffleCollections) so the row rhythm changes
    too — but read from here on every re-render, so resizes stay consistent. */
@@ -148,20 +161,27 @@ function renderWorks(key) {
   const padR = parseFloat(cs.paddingRight) || 0;
   const GAP = parseFloat(cs.rowGap) || 16;
   const W = (grid.clientWidth || window.innerWidth) - padL - padR;
-  const rows = buildRows(col.photos, W, SEED[key], GAP);
+  const single = SINGLE_COLUMN.matches;
+  const rows = buildRows(col.photos, W, SEED[key], GAP, single);
   const total = String(col.photos.length).padStart(2, "0");
 
   rows.forEach((r) => {
     const rowEl = document.createElement("div");
-    rowEl.className = "works-row";
-    rowEl.style.height = r.h + "px";
+    rowEl.className = "works-row" + (r.single ? " single" : "");
+    if (!r.single) rowEl.style.height = r.h + "px";
 
     r.items.forEach((p, ci) => {
       const i = col.photos.indexOf(p);
       const item = document.createElement("div");
       item.className = "work-item";
-      item.style.flexGrow = p._ar;          // width proportional to aspect ratio
-      item.style.flexBasis = "0";
+      if (r.single) {
+        item.style.flex = "none";
+        item.style.width = r.w + "px";
+        item.style.height = r.h + "px";
+      } else {
+        item.style.flexGrow = p._ar;          // width proportional to aspect ratio
+        item.style.flexBasis = "0";
+      }
       item.style.transitionDelay = ci * 90 + "ms"; // stagger within the row
       // expose each photo as a real, keyboard-operable control
       item.setAttribute("role", "button");
@@ -186,6 +206,22 @@ function renderWorks(key) {
       rowEl.appendChild(item);
       if (REDUCED) item.classList.add("in");
       else workIO.observe(item);
+
+      // Phones get a quiet caption under the photo instead of text printed on
+      // top of it (there is no hover to reveal it). The photo button already
+      // carries the same information for screen readers.
+      if (r.single) {
+        const cap = document.createElement("div");
+        cap.className = "work-caption";
+        cap.setAttribute("aria-hidden", "true");
+        cap.style.width = r.w + "px";
+        cap.innerHTML = `
+          <span class="work-caption-num">${String(i + 1).padStart(2, "0")}</span>
+          <span class="work-caption-title">${p.titleFlat}</span>
+          <span class="work-caption-meta">${p.cat} — ${p.date}</span>`;
+        cap.addEventListener("click", openThis);
+        rowEl.appendChild(cap);
+      }
     });
 
     grid.appendChild(rowEl);
@@ -484,7 +520,7 @@ const coverPage = (col) => `
     <span class="label">Ruben Van Ruysseveldt — Photographic Volume</span>
     <h2 class="book-cover-title">${col.name}</h2>
     <p class="book-cover-sub">${col.sub}</p>
-    <span class="book-cover-year">2021 — 2025 / ${String(col.photos.length).padStart(2, "0")} Plates</span>
+    <span class="book-cover-year">2021 — ${new Date().getFullYear()} / ${String(col.photos.length).padStart(2, "0")} Plates</span>
   </div>`;
 
 const detailPage = (p, idx, total, pageNo) => `
@@ -666,7 +702,6 @@ function initGalleryCursor() {
 function initHeroMotion() {
   if (REDUCED) return;
   const content = document.querySelector(".hero-content");
-  const meta = document.querySelector(".hero-meta-top");
   const side = document.querySelector(".hero-side");
   const vh = () => window.innerHeight;
   let raf = null, lastF = -1;
@@ -683,7 +718,6 @@ function initHeroMotion() {
       lastF = f;
       content.style.opacity = f;
       content.style.transform = `translateY(${y * -0.08}px)`;
-      if (meta) meta.style.opacity = f;
       if (side) side.style.opacity = f;
     });
   }, { passive: true });

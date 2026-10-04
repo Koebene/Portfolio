@@ -54,7 +54,8 @@
       #intro { display: none !important; }
       .reveal, .work-item { opacity: 1 !important; transform: none !important; clip-path: none !important; }
       .hero .line-in { transform: none !important; }
-      .hero-kicker, .hero-bottom, .hero-meta-top, .hero-side { opacity: 1 !important; transform: none !important; }
+      .hero-kicker, .hero-bottom, .hero-side { opacity: 1 !important; }
+      .hero-kicker, .hero-bottom { transform: none !important; }
     </style>
   </noscript>
 </head>
@@ -116,10 +117,6 @@
            sizes="100vw"
            alt="Featured photograph — black & white portrait">
     </div>
-    <div class="hero-meta-top">
-      <span>Photographer — Visual Artist</span>
-      <span>Portfolio / 2021 — 2025</span>
-    </div>
     <span class="hero-side">35 MM&ensp;—&ensp;f / 1.4&ensp;—&ensp;Belgium</span>
     <div class="hero-content">
       <p class="hero-kicker">Photography — a personal collection</p>
@@ -135,7 +132,6 @@
             moment that refuses to disappear. In that stillness I learn to feel
             more deliberately, and to see what the speed of living so often hides.
           </p>
-          <cite class="hero-cite">&mdash; Ruben Van Ruysseveldt</cite>
         </div>
         <div class="hero-scroll">
           <span>Scroll</span>
@@ -163,7 +159,7 @@
     </div>
 
     <div class="works-head">
-      <span class="label sec-label"><em>01</em> — Selected Work</span>
+      <span class="label sec-label">Selected Work</span>
       <div class="works-head-right">
         <button class="book-trigger" id="open-book">View as Book ↗</button>
         <span class="label works-count">— Projects</span>
@@ -176,7 +172,6 @@
   <!-- ─── About ─────────────────────────────────────────────────────────── -->
   <section class="about reveal" id="about">
     <div class="about-text">
-      <span class="label sec-label"><em>02</em> — About</span>
       <h2 class="about-heading">About<br><em class="ital">the</em> Work</h2>
       <p class="about-pull">&ldquo;A slower, sharper way of looking at the world.&rdquo;</p>
       <p class="about-body">
@@ -210,15 +205,13 @@
   <!-- ─── Contact ─────────────────────────────────────────────────────────── -->
   <section class="contact reveal" id="contact">
     <div class="contact-left">
-      <span class="label sec-label"><em>03</em> — Contact</span>
+      <span class="label sec-label">Contact</span>
       <h2 class="contact-heading">Say<br><em class="ital">hello</em></h2>
       <p class="contact-sub">This isn&rsquo;t a shop window &mdash; just a place to share what I see. If something here resonates, find me on Instagram.</p>
-      <a class="contact-email" href="https://www.instagram.com/rubenvanruysseveldt/" target="_blank" rel="noopener">@rubenvanruysseveldt</a>
     </div>
     <div class="contact-right">
-      <div class="contact-socials">
-        <a href="https://www.instagram.com/rubenvanruysseveldt/" target="_blank" rel="noopener">Instagram</a>
-      </div>
+      <span class="label">Instagram</span>
+      <a class="contact-email" href="https://www.instagram.com/rubenvanruysseveldt/" target="_blank" rel="noopener">@rubenvanruysseveldt&nbsp;<span aria-hidden="true">↗</span></a>
     </div>
   </section>
 
