@@ -250,20 +250,6 @@ window.imageVariants = {
 "images/ropey.jpeg"
 ]
 ],
-"images/share.jpg": [
-[
-800,
-"images/share-800.jpeg"
-],
-[
-1600,
-"images/share-1600.jpeg"
-],
-[
-2048,
-"images/share.jpg"
-]
-],
 "images/soundsystem.jpeg": [
 [
 800,

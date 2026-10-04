@@ -33,12 +33,17 @@ def is_variant(name):
     return bool(VARIANT_RE.search(name))
 
 
+def is_skipped(name):
+    # the link-preview card is only ever fetched by WhatsApp/Instagram etc.
+    return name.lower().startswith("share")
+
+
 def main():
     manifest = {}
     made = skipped = 0
 
     for fn in sorted(os.listdir(IMG_DIR)):
-        if not fn.lower().endswith((".jpg", ".jpeg")) or is_variant(fn):
+        if not fn.lower().endswith((".jpg", ".jpeg")) or is_variant(fn) or is_skipped(fn):
             continue
 
         path = os.path.join(IMG_DIR, fn)

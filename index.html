@@ -10,13 +10,16 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="Ruben Van Ruysseveldt — Photography">
   <meta property="og:description" content="A personal photography portfolio — film & digital, black & white and colour, made in Belgium for the love of it.">
-  <meta property="og:image" content="https://portfolio-mu-eight-vqpou60so0.vercel.app/images/share.jpg">
+  <meta property="og:image" content="https://portfolio-mu-eight-vqpou60so0.vercel.app/images/share-card.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Ruben van Ruysseveldt — Photography. A black and white portrait of a young girl.">
   <meta property="og:url" content="https://portfolio-mu-eight-vqpou60so0.vercel.app/">
   <meta property="og:site_name" content="Ruben Van Ruysseveldt">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Ruben Van Ruysseveldt — Photography">
   <meta name="twitter:description" content="A personal photography portfolio — film & digital, made in Belgium for the love of it.">
-  <meta name="twitter:image" content="https://portfolio-mu-eight-vqpou60so0.vercel.app/images/share.jpg">
+  <meta name="twitter:image" content="https://portfolio-mu-eight-vqpou60so0.vercel.app/images/share-card.jpg">
 
   <link rel="canonical" href="https://portfolio-mu-eight-vqpou60so0.vercel.app/">
   <!-- Preload must offer the same candidates as the <img>, otherwise a phone
@@ -73,10 +76,11 @@
     </div>
   </div>
   <script>
-    /* Play the intro only once per browsing session (no flash on revisits). */
+    /* Play the intro only once per browsing session (no flash on revisits),
+       and never in front of a photo someone was sent a link to. */
     (function () {
       try {
-        if (sessionStorage.getItem("rvr_intro")) {
+        if (sessionStorage.getItem("rvr_intro") || location.hash.indexOf("#/") === 0) {
           document.getElementById("intro").classList.add("skip");
         } else {
           sessionStorage.setItem("rvr_intro", "1");

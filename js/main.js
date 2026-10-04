@@ -33,14 +33,26 @@ function titleCase(s) {
   });
 }
 
+/* "Into the White" → "into-the-white": the photo's part of its web address.
+   Taken from the title, never the position, because the order is shuffled. */
+function slugify(s) {
+  return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
 /* Fill in derived fields the rest of the code expects. */
 function normalizeCollections() {
   Object.values(collections).forEach((col) => {
+    const seen = new Set();
     col.photos.forEach((p) => {
       p.titleFlat = p.title.replace(/\n/g, " ");
       const nice = titleCase(p.title);
       p.titleNice = nice.replace(/\n/g, " ");          // one line (index, captions)
       p.titleHTML = nice.replace(/\n/g, "<br>");        // as authored (detail, book)
+      let slug = slugify(p.titleFlat) || "photo";
+      for (let n = 2; seen.has(slug); n++) slug = `${slugify(p.titleFlat)}-${n}`;
+      seen.add(slug);
+      p.slug = slug;
       p._ar = getAR(p);
     });
   });
@@ -483,6 +495,72 @@ function setChromeInert(on) {
   pageChrome().forEach((el) => { if (el) el.inert = on; });
 }
 
+/* ─── Addresses: every photograph (and the book) has its own link ──────────
+   #/chroma/the-visitor opens that photo; #/book/monochrome opens the book.
+   Opening adds ONE history entry and stepping to the next photo only replaces
+   it — so the back gesture on a phone closes the photo instead of leaving the
+   site, and a copied or shared link opens exactly that picture. */
+const COLL_SLUG = { mono: "monochrome", color: "chroma" };
+const SLUG_COLL = { monochrome: "mono", chroma: "color" };
+const BASE_TITLE = document.title;
+const baseURL = () => location.pathname + location.search;
+let routing = false;   // true while we're following the address bar / history
+
+function parseRoute(hash) {
+  const m = /^#\/([a-z]+)\/([a-z0-9-]+)\/?$/.exec(hash || "");
+  if (!m) return null;
+  if (m[1] === "book") return SLUG_COLL[m[2]] ? { book: true, key: SLUG_COLL[m[2]] } : null;
+  const key = SLUG_COLL[m[1]];
+  if (!key) return null;
+  const idx = collections[key].photos.findIndex((p) => p.slug === m[2]);
+  return idx >= 0 ? { key, idx } : null;
+}
+const photoURL = (key, p) => `#/${COLL_SLUG[key]}/${p.slug}`;
+
+/* put the page in the collection a link points to — instantly, no iris */
+function showCollection(key) {
+  if (key === current) return;
+  current = key;
+  setThemeColor(key);
+  applyCollection(key);
+}
+
+window.addEventListener("popstate", () => {
+  const r = parseRoute(location.hash);
+  routing = true;
+  try {
+    if (r && r.book) {
+      closeOverlay(true);
+      showCollection(r.key);
+      if (!bookEl.classList.contains("open")) openBook();
+    } else if (r) {
+      closeBook(true);
+      showCollection(r.key);
+      openOverlay(r.key, r.idx);
+    } else {
+      closeOverlay(true);
+      closeBook(true);
+    }
+  } finally {
+    routing = false;
+  }
+});
+
+/* Share the photo that's open: the phone's own share sheet where there is one,
+   otherwise copy the link. */
+async function sharePhoto(btn) {
+  if (!overlayState) return;
+  const p = collections[overlayState.key].photos[overlayState.idx];
+  const url = location.href;
+  const title = `${p.titleNice} — Ruben Van Ruysseveldt`;
+  try {
+    if (navigator.share) { await navigator.share({ title, url }); return; }
+    await navigator.clipboard.writeText(url);
+    btn.textContent = "Link copied";
+    setTimeout(() => { btn.textContent = "Share"; }, 2000);
+  } catch (e) { /* share sheet dismissed — nothing to do */ }
+}
+
 /* ─── Project Overlay ───────────────────────────────────────────────────── */
 const overlay = document.getElementById("overlay");
 let overlayState = null;       // { key, idx } while the overlay is open
@@ -503,11 +581,21 @@ function openOverlay(key, idx) {
   const prev = col.photos[prevIdx];
   overlayState = { key, idx };
 
+  // one history entry per opening; next/prev only rewrite it
+  if (!routing) {
+    if (wasOpen) history.replaceState({ photo: true }, "", photoURL(key, p));
+    else history.pushState({ photo: true }, "", photoURL(key, p));
+  }
+  document.title = `${p.titleNice} — ${BASE_TITLE}`;
+
   const pad = (n) => String(n).padStart(2, "0");
   overlay.innerHTML = `
     <div class="overlay-nav">
       <span class="label tech">${col.name} — ${p.titleNice}</span>
-      <button class="overlay-close tech" onclick="closeOverlay()">Close ✕</button>
+      <div class="overlay-actions">
+        <button class="overlay-share tech" onclick="sharePhoto(this)">Share</button>
+        <button class="overlay-close tech" onclick="closeOverlay()">Close ✕</button>
+      </div>
     </div>
     <div class="overlay-hero">
       <div class="overlay-hero-image" id="overlay-hero-image"></div>
@@ -549,8 +637,11 @@ function openOverlay(key, idx) {
   });
 }
 
-function closeOverlay() {
+function closeOverlay(fromHistory) {
   if (!overlay.classList.contains("open")) return;
+  // Opening pushed a history entry: step back over it, so "forward" can reopen
+  // the photo. The popstate handler then calls us again to do the closing.
+  if (fromHistory !== true && history.state && history.state.photo) { history.back(); return; }
   overlay.classList.remove("open");
   overlay.setAttribute("aria-hidden", "true");
   overlayState = null;
@@ -558,6 +649,8 @@ function closeOverlay() {
   setChromeInert(false);
   if (overlayReturnFocus && overlayReturnFocus.focus) overlayReturnFocus.focus();
   overlayReturnFocus = null;
+  if (location.hash.startsWith("#/")) history.replaceState(null, "", baseURL());
+  document.title = BASE_TITLE;
 }
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") { closeOverlay(); return; }
@@ -721,6 +814,8 @@ function openBook() {
   bookReturnFocus = document.activeElement;
   buildBook(current);
   renderSpread(0);
+  if (!routing) history.pushState({ book: true }, "", `#/book/${COLL_SLUG[current]}`);
+  document.title = `${titleCase(collections[current].name)} — Photo Book — ${BASE_TITLE}`;
   bookEl.setAttribute("aria-hidden", "false");
   setChromeInert(true);
   document.body.style.overflow = "hidden";
@@ -730,14 +825,17 @@ function openBook() {
   });
 }
 
-function closeBook() {
+function closeBook(fromHistory) {
   if (!bookEl.classList.contains("open")) return;
+  if (fromHistory !== true && history.state && history.state.book) { history.back(); return; }
   bookEl.classList.remove("open");
   bookEl.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
   setChromeInert(false);
   if (bookReturnFocus && bookReturnFocus.focus) bookReturnFocus.focus();
   bookReturnFocus = null;
+  if (location.hash.startsWith("#/")) history.replaceState(null, "", baseURL());
+  document.title = BASE_TITLE;
 }
 
 function turnPage(dir) {
@@ -865,6 +963,57 @@ function setThemeColor(key) {
     ?.setAttribute("content", key === "mono" ? "#0A0A0A" : "#F1EEE7");
 }
 
+/* ─── Swipe (phones): left/right through photos and book pages ─────────────
+   Only a clearly horizontal drag counts; vertical scrolling is left to the
+   browser (touch-action: pan-y in the CSS). `follow` lets the photo trail the
+   finger a little so the gesture feels physical. */
+function addSwipe(el, { within, onNext, onPrev, follow }) {
+  let x0 = 0, y0 = 0, dx = 0, active = false, horizontal = null;
+  const reset = () => { active = false; horizontal = null; dx = 0; };
+  el.addEventListener("touchstart", (e) => {
+    if (e.touches.length !== 1 || (within && !e.target.closest(within))) return;
+    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; dx = 0;
+    active = true; horizontal = null;
+  }, { passive: true });
+  el.addEventListener("touchmove", (e) => {
+    if (!active) return;
+    dx = e.touches[0].clientX - x0;
+    const dy = e.touches[0].clientY - y0;
+    if (horizontal === null && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) horizontal = Math.abs(dx) > Math.abs(dy) * 1.2;
+    if (horizontal && follow) follow(dx);
+  }, { passive: true });
+  el.addEventListener("touchend", () => {
+    if (!active) return;
+    const go = horizontal && Math.abs(dx) > 56;
+    const dir = dx;
+    reset();
+    if (go) (dir < 0 ? onNext : onPrev)();
+    else if (follow) follow(0, true);
+  });
+  el.addEventListener("touchcancel", () => { if (active && follow) follow(0, true); reset(); });
+}
+
+function initSwipe() {
+  const step = (d) => {
+    if (!overlayState) return;
+    const n = collections[overlayState.key].photos.length;
+    openOverlay(overlayState.key, (overlayState.idx + d + n) % n);
+  };
+  addSwipe(overlay, {
+    within: ".overlay-hero-image",
+    onNext: () => step(1),
+    onPrev: () => step(-1),
+    follow: (dx, release) => {
+      const f = overlay.querySelector(".photo-frame");
+      if (!f) return;
+      f.style.transition = release ? "transform 0.45s var(--ease), opacity 0.45s var(--ease)" : "none";
+      f.style.transform = dx ? `translateX(${dx * 0.35}px)` : "";
+      f.style.opacity = dx ? String(Math.max(0.55, 1 - Math.abs(dx) / 700)) : "";
+    },
+  });
+  addSwipe(document.querySelector(".book"), { onNext: bookNext, onPrev: bookPrev });
+}
+
 /* ─── Footer signature: set "Ruysseveldt" to exactly the page width ──────── */
 function fitFooterMark() {
   const word = document.getElementById("footer-word");
@@ -979,4 +1128,17 @@ document.addEventListener("DOMContentLoaded", () => {
     else if (e.key === "ArrowLeft") bookPrev();
     else if (e.key === "Escape") closeBook();
   });
+
+  initSwipe();
+
+  // Arrived through a shared link? Open that photo (or the book) straight
+  // away. The link's own entry becomes the plain page underneath, so the
+  // back gesture closes the photo and leaves the visitor on the site.
+  const route = parseRoute(location.hash);
+  if (route) {
+    history.replaceState(null, "", baseURL());
+    showCollection(route.key);
+    if (route.book) openBook();
+    else openOverlay(route.key, route.idx);
+  }
 });

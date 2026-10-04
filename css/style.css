@@ -567,8 +567,14 @@ body.mono .footer-seal .on-light { display: none; }
   padding: 20px var(--gutter); background: var(--bg); border-bottom: 1px solid var(--line);
 }
 .overlay-nav .label { color: var(--muted); }
-.overlay-close { color: var(--fg); transition: opacity 0.2s; }
-.overlay-close:hover { opacity: 0.5; }
+.overlay-actions { display: flex; align-items: center; gap: 32px; }
+.overlay-close, .overlay-share { color: var(--fg); transition: opacity 0.2s; }
+.overlay-share { color: var(--muted); }
+.overlay-close:hover, .overlay-share:hover { opacity: 0.5; }
+
+/* phones: horizontal swipes on the photo / book are ours, vertical scroll
+   stays with the browser */
+.overlay-hero-image, .book { touch-action: pan-y; }
 
 .overlay-hero { display: grid; grid-template-columns: 1.4fr 1fr; min-height: calc(100vh - 73px); border-bottom: 1px solid var(--line); }
 .overlay-hero-text {
@@ -833,6 +839,10 @@ body.mono .book-spread::after { background: linear-gradient(90deg, transparent, 
 
   .footer-meta { gap: 12px 20px; }
   .footer-copy { flex-basis: calc(100% - 56px); }
+
+  /* the title is set large just below — on a phone the bar is only controls */
+  .overlay-nav .label { display: none; }
+  .overlay-actions { width: 100%; justify-content: space-between; }
 
   .overlay-hero { grid-template-columns: 1fr; min-height: auto; }
   .overlay-hero-image { padding: 0; }
