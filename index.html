@@ -26,10 +26,13 @@
         imagesizes="100vw">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="favicon.svg">
-  <meta name="theme-color" content="#0B0B0C">
+  <meta name="theme-color" content="#0A0A0A">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@1,400;1,500&display=swap" rel="stylesheet">
+  <!-- Bodoni Moda: the editorial voice (a Didone, like the R in the seal).
+       Geist: interface and reading text. Geist Mono: the technical voice —
+       frame numbers, dates, exposure, like the printing on a film's edge. -->
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..500;1,6..96,400..500&family=Geist:wght@300..500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 
   <!-- Structured data for search engines / rich results -->
@@ -54,8 +57,7 @@
       #intro { display: none !important; }
       .reveal, .work-item { opacity: 1 !important; transform: none !important; clip-path: none !important; }
       .hero .line-in { transform: none !important; }
-      .hero-kicker, .hero-bottom, .hero-side { opacity: 1 !important; }
-      .hero-kicker, .hero-bottom { transform: none !important; }
+      .hero-caption, .hero-bottom, .hero-side { opacity: 1 !important; transform: none !important; }
     </style>
   </noscript>
 </head>
@@ -63,12 +65,11 @@
 
   <a class="skip-link" href="#work">Skip to work</a>
 
-  <!-- ─── Intro ───────────────────────────────────────────────────────── -->
-  <div id="intro">
+  <!-- ─── Intro: the seal, and the roll advancing to its last frame ─────── -->
+  <div id="intro" aria-hidden="true">
     <div class="intro-inner">
-      <img class="intro-sig" src="images/logo-mark.svg" alt="Ruben Van Ruysseveldt — Photography">
-      <span class="intro-line"></span>
-      <span class="intro-sub">Photography — Belgium</span>
+      <img class="intro-sig" src="images/logo-mark.svg" alt="">
+      <span class="intro-count tech"><span id="intro-frame">00</span> / <span id="intro-total">27</span></span>
     </div>
   </div>
   <script>
@@ -84,23 +85,24 @@
     })();
   </script>
 
-  <!-- ─── Film grain + scroll progress + collection wipe ─────────────── -->
+  <!-- ─── Film grain + scroll progress + collection wipe (fallback) ──────── -->
   <div class="grain" aria-hidden="true"></div>
   <div class="progress" id="progress" aria-hidden="true"></div>
   <div id="wipe" class="wipe" aria-hidden="true"><span class="wipe-name"></span></div>
 
   <!-- ─── Nav ─────────────────────────────────────────────────────────── -->
   <nav class="over-hero ink-light">
-    <span class="nav-logo">
-      <img class="logo-sig logo-light" src="images/logo-mark.svg" alt="Ruben Van Ruysseveldt — Photography">
-      <img class="logo-sig logo-dark" src="images/logo-mark-dark.svg" alt="" aria-hidden="true">
-      <span class="nav-word">Ruben Van Ruysseveldt</span>
-    </span>
+    <a class="nav-logo" href="#main" aria-label="Ruben Van Ruysseveldt — back to top">
+      <img class="logo-sig logo-light" src="images/logo-mark.svg" alt="">
+      <img class="logo-sig logo-dark" src="images/logo-mark-dark.svg" alt="">
+      <span class="nav-word">Ruben <em>van</em> Ruysseveldt</span>
+    </a>
     <button class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false">
       <span></span><span></span>
     </button>
     <ul class="nav-links" id="nav-links">
       <li><a href="#work">Work</a></li>
+      <li><a href="#work" id="nav-index">Index</a></li>
       <li><a href="#" id="nav-book">Book</a></li>
       <li><a href="#about">About</a></li>
       <li><a href="#contact">Contact</a></li>
@@ -109,71 +111,86 @@
 
   <main id="main">
 
-  <!-- ─── Hero ─────────────────────────────────────────────────────────── -->
+  <!-- ─── Hero: the opening frame, captioned like a print on a wall ─────── -->
   <header class="hero">
     <div class="hero-img">
       <img src="images/hero.jpeg"
            srcset="images/hero-800.jpeg 800w, images/hero.jpeg 1493w"
            sizes="100vw"
-           alt="Featured photograph — black & white portrait">
+           alt="First Weather — black & white portrait of a young girl, brow gathered">
     </div>
-    <span class="hero-side">35 MM&ensp;—&ensp;f / 1.4&ensp;—&ensp;Belgium</span>
+    <span class="hero-side tech">35mm&ensp;·&ensp;f/1.4&ensp;·&ensp;Belgium</span>
     <div class="hero-content">
-      <p class="hero-kicker">Photography — a personal collection</p>
-      <h1 class="hero-title">
-        <span class="line-mask"><span class="line-in">Ruben <em class="ital">van</em></span></span>
-        <span class="line-mask"><span class="line-in">Ruysseveldt</span></span>
-      </h1>
-      <div class="hero-bottom">
-        <div class="hero-quote">
-          <p class="hero-desc">
-            Every photograph is a small rebellion against time. While the world
-            insists on rushing forward, the image stays &mdash; a held breath, a
-            moment that refuses to disappear. In that stillness I learn to feel
-            more deliberately, and to see what the speed of living so often hides.
-          </p>
-        </div>
-        <div class="hero-scroll">
-          <span>Scroll</span>
-          <span class="line"></span>
+      <p class="hero-caption tech">
+        <span>N° 01</span><span>First Weather</span><span>Portrait — 2023</span>
+      </p>
+      <div class="hero-row">
+        <h1 class="hero-title">
+          <span class="line-mask"><span class="line-in">Ruben <em>van</em></span></span>
+          <span class="line-mask"><span class="line-in">Ruysseveldt</span></span>
+        </h1>
+        <div class="hero-bottom">
+          <p class="hero-kicker tech">Photography —<br>a personal collection</p>
+          <a class="hero-scroll tech" href="#manifesto"><span>Scroll</span><span class="line"></span></a>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- ─── Collections ──────────────────────────────────────────────────── -->
-  <section class="collections" id="work">
-    <div class="switch">
-      <button class="switch-btn active" data-key="mono">
-        <span class="dot"></span>
-        <span class="switch-index"><em>01</em> — Collection</span>
-        <span class="switch-name">Monochrome</span>
-        <span class="switch-sub">Black &amp; white — light, form &amp; stillness</span>
-      </button>
-      <button class="switch-btn" data-key="color">
-        <span class="dot"></span>
-        <span class="switch-index"><em>02</em> — Collection</span>
-        <span class="switch-name">Chroma</span>
-        <span class="switch-sub">Colour — saturated, warm &amp; alive</span>
-      </button>
+  <!-- ─── Manifesto ──────────────────────────────────────────────────────── -->
+  <section class="manifesto" id="manifesto">
+    <p class="kicker tech reveal">Statement</p>
+    <p class="manifesto-lead reveal">Every photograph is a small rebellion against <em>time</em>.</p>
+    <div class="manifesto-row reveal">
+      <p class="manifesto-body">
+        While the world insists on rushing forward, the image stays &mdash; a held
+        breath, a moment that refuses to disappear. In that stillness I learn to
+        feel more deliberately, and to see what the speed of living so often hides.
+      </p>
+      <dl class="facts tech">
+        <div><dt>Frames</dt><dd id="fact-frames">27</dd></div>
+        <div><dt>Collections</dt><dd>02</dd></div>
+        <div><dt>Since</dt><dd>2021</dd></div>
+        <div><dt>Based in</dt><dd>Belgium</dd></div>
+      </dl>
     </div>
+  </section>
 
-    <div class="works-head">
-      <span class="label sec-label">Selected Work</span>
-      <div class="works-head-right">
-        <button class="book-trigger" id="open-book">View as Book ↗</button>
-        <span class="label works-count">— Projects</span>
+  <!-- ─── Work ───────────────────────────────────────────────────────────── -->
+  <section class="collections" id="work">
+    <div class="work-bar">
+      <div class="tabs" aria-label="Collections">
+        <button class="switch-btn active" data-key="mono" aria-pressed="true">
+          <span class="switch-name">Monochrome</span><sup class="switch-count" data-count="mono"></sup>
+        </button>
+        <button class="switch-btn" data-key="color" aria-pressed="false">
+          <span class="switch-name">Chroma</span><sup class="switch-count" data-count="color"></sup>
+        </button>
+      </div>
+      <div class="views tech" aria-label="View">
+        <button class="view-btn active" data-view="gallery" aria-pressed="true">Gallery</button>
+        <button class="view-btn" data-view="index" aria-pressed="false">Index</button>
+        <button class="view-btn" id="open-book">Book <span aria-hidden="true">↗</span></button>
       </div>
     </div>
+    <p class="work-sub tech"><span id="work-sub">Black &amp; white — light, form &amp; stillness</span><span class="works-count"></span></p>
 
-    <div class="works"><!-- populated by JS --></div>
+    <div class="works"><!-- gallery: populated by JS --></div>
+    <ol class="index" hidden><!-- index: populated by JS --></ol>
   </section>
 
   <!-- ─── About ─────────────────────────────────────────────────────────── -->
-  <section class="about reveal" id="about">
-    <div class="about-text">
-      <h2 class="about-heading">About<br><em class="ital">the</em> Work</h2>
-      <p class="about-pull">&ldquo;A slower, sharper way of looking at the world.&rdquo;</p>
+  <section class="about" id="about">
+    <figure class="about-image reveal">
+      <img src="images/about-portrait.jpeg"
+           srcset="images/about-portrait-800.jpeg 800w, images/about-portrait.jpeg 1267w"
+           sizes="(max-width: 820px) 100vw, 45vw"
+           alt="Ruben Van Ruysseveldt behind a Canon FTb film camera">
+      <figcaption class="tech">Self-portrait — Canon FTb</figcaption>
+    </figure>
+    <div class="about-text reveal">
+      <p class="kicker tech">About</p>
+      <h2 class="about-heading">A slower, <em>sharper</em> way of looking at the world.</h2>
       <p class="about-body">
         I&rsquo;m Ruben Van Ruysseveldt, a photographer based in Belgium. This is
         a personal space &mdash; built to share my work with myself and with the
@@ -184,51 +201,41 @@
         Lately I&rsquo;m drawn most to film. There&rsquo;s something about it that
         holds an emotion you can&rsquo;t fake &mdash; entirely in the moment. It
         asks you to step into the scene yourself, and in doing so it changes how
-        you experience life: a slower, sharper, different way of looking at the
-        world.
+        you experience life.
       </p>
-      <div class="about-detail">
-        <div><div class="label">Discipline</div><div class="about-detail-value">Film Photography</div></div>
-        <div><div class="label">Based in</div><div class="about-detail-value">Belgium</div></div>
-        <div><div class="label">Approach</div><div class="about-detail-value">Personal &amp; non-commercial</div></div>
-        <div><div class="label">Born</div><div class="about-detail-value">June 1992</div></div>
-      </div>
-    </div>
-    <div class="about-image">
-      <img src="images/about-portrait.jpeg"
-           srcset="images/about-portrait-800.jpeg 800w, images/about-portrait.jpeg 1267w"
-           sizes="(max-width: 820px) 100vw, 50vw"
-           alt="Ruben Van Ruysseveldt behind a Canon FTb film camera">
+      <dl class="facts tech">
+        <div><dt>Discipline</dt><dd>Film photography</dd></div>
+        <div><dt>Based in</dt><dd>Belgium</dd></div>
+        <div><dt>Approach</dt><dd>Personal, non-commercial</dd></div>
+        <div><dt>Born</dt><dd>June 1992</dd></div>
+      </dl>
     </div>
   </section>
 
   <!-- ─── Contact ─────────────────────────────────────────────────────────── -->
-  <section class="contact reveal" id="contact">
-    <div class="contact-left">
-      <span class="label sec-label">Contact</span>
-      <h2 class="contact-heading">Say<br><em class="ital">hello</em></h2>
+  <section class="contact" id="contact">
+    <p class="kicker tech reveal">Contact</p>
+    <h2 class="contact-heading reveal">Say <em>hello</em>.</h2>
+    <div class="contact-row reveal">
       <p class="contact-sub">This isn&rsquo;t a shop window &mdash; just a place to share what I see. If something here resonates, find me on Instagram.</p>
-    </div>
-    <div class="contact-right">
-      <span class="label">Instagram</span>
-      <a class="contact-email" href="https://www.instagram.com/rubenvanruysseveldt/" target="_blank" rel="noopener">@rubenvanruysseveldt&nbsp;<span aria-hidden="true">↗</span></a>
+      <a class="contact-email" href="https://www.instagram.com/rubenvanruysseveldt/" target="_blank" rel="noopener">@rubenvanruysseveldt<span class="arrow" aria-hidden="true">↗</span></a>
     </div>
   </section>
 
-  <!-- ─── Colophon end-mark ─────────────────────────────────────────────── -->
-  <div class="colophon reveal">
-    <img class="colophon-mark on-dark" src="images/logo-mark.svg" alt="">
-    <img class="colophon-mark on-light" src="images/logo-mark-dark.svg" alt="">
-    <span class="label">Made for the love of it — Belgium</span>
-  </div>
-
   </main>
 
-  <!-- ─── Footer ─────────────────────────────────────────────────────────── -->
+  <!-- ─── Footer: colophon + the signature, set full width ─────────────────── -->
   <footer>
-    <span class="footer-copy">© <span id="year">2025</span> Ruben Van Ruysseveldt</span>
-    <span class="footer-time">Belgium — <span id="local-time">--:--</span></span>
-    <button class="footer-top" id="back-top">Back to top ↑</button>
+    <div class="footer-meta tech">
+      <span class="footer-seal">
+        <img class="on-dark" src="images/logo-mark.svg" alt="">
+        <img class="on-light" src="images/logo-mark-dark.svg" alt="">
+      </span>
+      <span class="footer-copy">© <span id="year">2026</span> Ruben Van Ruysseveldt — made for the love of it</span>
+      <span class="footer-time"><span class="safelight" aria-hidden="true"></span>Belgium <span id="local-time">--:--</span></span>
+      <button class="footer-top" id="back-top">Back to top ↑</button>
+    </div>
+    <div class="footer-mark" aria-hidden="true"><span id="footer-word">Ruysseveldt</span></div>
   </footer>
 
   <!-- ─── Project Overlay ─────────────────────────────────────────────────── -->
@@ -237,8 +244,8 @@
   <!-- ─── Book Mode ───────────────────────────────────────────────────────── -->
   <div id="book" class="book-overlay" role="dialog" aria-modal="true" aria-label="Photo book" aria-hidden="true">
     <div class="book-topbar">
-      <span class="label book-crumb"></span>
-      <button class="book-close" onclick="closeBook()">Close ✕</button>
+      <span class="book-crumb tech"></span>
+      <button class="book-close tech" onclick="closeBook()">Close ✕</button>
     </div>
     <div class="book-stage">
       <button class="book-arrow prev" id="book-prev" aria-label="Previous page">←</button>
@@ -250,7 +257,7 @@
       <button class="book-arrow next" id="book-next" aria-label="Next page">→</button>
     </div>
     <div class="book-bottombar">
-      <span class="label book-counter"></span>
+      <span class="book-counter tech"></span>
     </div>
   </div>
 

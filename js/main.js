@@ -21,15 +21,31 @@ const collections = loadCollections();
 let current = "mono";
 const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+/* Titles are stored in capitals (photos.js / admin), but the editorial serif
+   wants them set in title case: "SHOES IN\nTHE SKY" → "Shoes in the Sky". */
+const SMALL_WORDS = new Set(["a", "an", "and", "at", "by", "for", "in", "of", "on", "or", "the", "to", "with"]);
+function titleCase(s) {
+  let first = true;
+  return s.toLowerCase().replace(/[^\s\n]+/g, (w) => {
+    const keepSmall = !first && SMALL_WORDS.has(w);
+    first = false;
+    return keepSmall ? w : w.charAt(0).toUpperCase() + w.slice(1);
+  });
+}
+
 /* Fill in derived fields the rest of the code expects. */
 function normalizeCollections() {
   Object.values(collections).forEach((col) => {
     col.photos.forEach((p) => {
       p.titleFlat = p.title.replace(/\n/g, " ");
+      const nice = titleCase(p.title);
+      p.titleNice = nice.replace(/\n/g, " ");          // one line (index, captions)
+      p.titleHTML = nice.replace(/\n/g, "<br>");        // as authored (detail, book)
       p._ar = getAR(p);
     });
   });
 }
+const frameNo = (i) => "N° " + String(i + 1).padStart(2, "0");
 
 /* Aspect ratio (width / height): use the photo's `ar`, else 1. */
 function getAR(p) {
@@ -190,12 +206,10 @@ function renderWorks(key) {
       item.innerHTML = `
         <img src="${p.src}"${imgAttrs(p.src, SIZES_GRID)} alt="" loading="lazy" decoding="async">
         <img class="photo-mark" src="images/logo-watermark.svg" alt="" loading="lazy">
-        <div class="work-overlay">
-          <span class="work-num">${String(i + 1).padStart(2, "0")}</span>
-          <div class="work-info">
-            <div class="work-title">${p.title.replace(/\n/g, "<br>")}</div>
-            <div class="work-cat">${p.cat} — ${p.date}</div>
-          </div>
+        <div class="work-overlay" aria-hidden="true">
+          <span class="work-num tech">${frameNo(i)}</span>
+          <span class="work-title">${p.titleNice}</span>
+          <span class="work-cat tech">${p.cat} — ${p.date}</span>
         </div>
       `;
       const openThis = () => openOverlay(key, i);
@@ -212,12 +226,12 @@ function renderWorks(key) {
       // carries the same information for screen readers.
       if (r.single) {
         const cap = document.createElement("div");
-        cap.className = "work-caption";
+        cap.className = "work-caption tech";
         cap.setAttribute("aria-hidden", "true");
         cap.style.width = r.w + "px";
         cap.innerHTML = `
-          <span class="work-caption-num">${String(i + 1).padStart(2, "0")}</span>
-          <span class="work-caption-title">${p.titleFlat}</span>
+          <span class="work-caption-num">${frameNo(i)}</span>
+          <span class="work-caption-title">${p.titleNice}</span>
           <span class="work-caption-meta">${p.cat} — ${p.date}</span>`;
         cap.addEventListener("click", openThis);
         rowEl.appendChild(cap);
@@ -227,7 +241,98 @@ function renderWorks(key) {
     grid.appendChild(rowEl);
   });
 
-  document.querySelector(".works-count").textContent = `${total} Photos — ${col.name}`;
+  document.querySelector(".works-count").textContent = `${total} frames`;
+  document.getElementById("work-sub").textContent = col.sub;
+}
+
+/* ─── Index view: the collection as a list of plates ─────────────────────────
+   Number, title, category, place, year — one row per photograph. On a pointer
+   device the photo floats next to the cursor while you read down the list;
+   on phones each row carries a small thumbnail instead. */
+let view = "gallery";
+function renderIndex(key) {
+  const col = collections[key];
+  const list = document.querySelector(".index");
+  list.innerHTML = col.photos.map((p, i) => {
+    const thumb = (window.imageVariants && window.imageVariants[p.src]) ? window.imageVariants[p.src][0][1] : p.src;
+    return `
+    <li class="index-row" role="button" tabindex="0" data-i="${i}" data-thumb="${thumb}"
+        aria-label="${p.titleFlat} — ${p.cat}, ${p.loc}, ${p.date}. Open photograph.">
+      <img class="ix-thumb" src="${thumb}" alt="" loading="lazy" decoding="async">
+      <span class="ix-num tech">${frameNo(i)}</span>
+      <span class="ix-title">${p.titleNice}</span>
+      <span class="ix-cat tech">${p.cat}</span>
+      <span class="ix-loc tech">${p.loc}</span>
+      <span class="ix-year tech">${p.date.replace(/^.*?(\d{4}).*$/, "$1")}</span>
+    </li>`;
+  }).join("");
+}
+
+function setView(next) {
+  view = next;
+  const gallery = document.querySelector(".works");
+  const index = document.querySelector(".index");
+  document.querySelectorAll(".view-btn[data-view]").forEach((b) => {
+    const on = b.dataset.view === next;
+    b.classList.toggle("active", on);
+    b.setAttribute("aria-pressed", on ? "true" : "false");
+  });
+  gallery.hidden = next !== "gallery";
+  index.hidden = next !== "index";
+  if (next === "index") renderIndex(current);
+  else renderWorks(current);
+}
+
+function initIndex() {
+  const list = document.querySelector(".index");
+  const open = (row) => openOverlay(current, +row.dataset.i);
+  list.addEventListener("click", (e) => { const row = e.target.closest(".index-row"); if (row) open(row); });
+  list.addEventListener("keydown", (e) => {
+    const row = e.target.closest(".index-row");
+    if (row && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); open(row); }
+  });
+
+  // floating preview, eased toward the pointer so it trails like a loupe
+  if (window.matchMedia("(hover: none), (pointer: coarse)").matches) return;
+  const preview = document.createElement("div");
+  preview.className = "index-preview";
+  preview.setAttribute("aria-hidden", "true");
+  preview.innerHTML = "<img alt=''>";
+  document.body.appendChild(preview);
+  const img = preview.querySelector("img");
+  let tx = 0, ty = 0, x = 0, y = 0, running = false;
+  const tick = () => {
+    x += (tx - x) * 0.16; y += (ty - y) * 0.16;
+    preview.style.left = x + "px"; preview.style.top = y + "px";
+    if (Math.abs(tx - x) > 0.3 || Math.abs(ty - y) > 0.3) requestAnimationFrame(tick);
+    else running = false;
+  };
+  list.addEventListener("mousemove", (e) => {
+    // Park the photo in the open band between the titles and the category
+    // column — never on top of the title being read — and follow only the
+    // pointer's height, so it slides along the list like a loupe.
+    const cat = list.querySelector(".index-row .ix-cat");
+    const w = preview.offsetWidth || 260;
+    const catLeft = cat && cat.offsetParent ? cat.getBoundingClientRect().left : window.innerWidth * 0.62;
+    tx = catLeft - 32 - w / 2;
+    ty = e.clientY;
+    if (!x) { x = tx; y = ty; }           // first move: appear in place, no fly-in
+    if (!running) { running = true; requestAnimationFrame(tick); }
+  });
+  list.addEventListener("mouseover", (e) => {
+    const row = e.target.closest(".index-row");
+    if (!row) return;
+    list.classList.add("has-hover");
+    list.querySelectorAll(".is-hover").forEach((r) => r.classList.remove("is-hover"));
+    row.classList.add("is-hover");
+    if (img.getAttribute("src") !== row.dataset.thumb) img.src = row.dataset.thumb;
+    preview.classList.add("show");
+  });
+  list.addEventListener("mouseleave", () => {
+    list.classList.remove("has-hover");
+    list.querySelectorAll(".is-hover").forEach((r) => r.classList.remove("is-hover"));
+    preview.classList.remove("show");
+  });
 }
 
 /* Re-layout on resize (debounced) so rows always stay edge-to-edge. */
@@ -235,30 +340,54 @@ let resizeTimer;
 window.addEventListener("resize", () => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => {
-    renderWorks(current);
+    if (view === "gallery") renderWorks(current);
     const h = document.querySelector(".hero");
     heroThreshold = (h ? h.offsetHeight : window.innerHeight) - 70;
+    fitFooterMark();
   }, 200);
 });
 
 /* ─── Switch Collection (+ theme) ───────────────────────────────────────────
-   A full-screen wipe in the *target* theme slides up, the theme + grid swap
-   underneath, then the wipe exits upward — a clean editorial scene change. */
+   The new collection opens like a lens iris: a hexagon (the aperture in the
+   seal) grows from the tab you pressed, revealing the other theme. Uses the
+   View Transitions API; elsewhere a full-screen wipe does the scene change. */
 let switching = false;
-function switchCollection(key) {
+
+function applyCollection(key) {
+  document.body.classList.toggle("mono", key === "mono");
+  document.querySelectorAll(".switch-btn").forEach((btn) => {
+    const on = btn.dataset.key === key;
+    btn.classList.toggle("active", on);
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+  });
+  updateNav();
+  if (view === "index") renderIndex(key);
+  else renderWorks(key);
+}
+
+function switchCollection(key, originEl) {
   if (key === current || switching) return;
   current = key;
-
-  document.querySelectorAll(".switch-btn").forEach((btn) => {
-    btn.classList.toggle("active", btn.dataset.key === key);
-  });
-
   setThemeColor(key);
 
-  if (REDUCED) {
-    document.body.classList.toggle("mono", key === "mono");
-    updateNav();
-    renderWorks(key);
+  if (REDUCED) { applyCollection(key); return; }
+
+  if (document.startViewTransition) {
+    const r = (originEl || document.querySelector(`.switch-btn[data-key="${key}"]`)).getBoundingClientRect();
+    const root = document.documentElement;
+    root.style.setProperty("--vt-x", r.left + r.width / 2 + "px");
+    root.style.setProperty("--vt-y", r.top + r.height / 2 + "px");
+    root.classList.add("switching");
+    switching = true;
+    const t = document.startViewTransition(() => {
+      applyCollection(key);
+      // the photos in view should already be developed when the iris opens
+      document.querySelectorAll(".work-item").forEach((el) => {
+        const b = el.getBoundingClientRect();
+        if (b.top < window.innerHeight && b.bottom > 0) el.classList.add("in");
+      });
+    });
+    t.finished.finally(() => { root.classList.remove("switching"); switching = false; });
     return;
   }
 
@@ -267,11 +396,8 @@ function switchCollection(key) {
   wipe.querySelector(".wipe-name").textContent = collections[key].name;
   wipe.classList.toggle("light", key === "color");
   wipe.classList.add("in");
-
   setTimeout(() => {
-    document.body.classList.toggle("mono", key === "mono");
-    updateNav();
-    renderWorks(key);
+    applyCollection(key);
     wipe.classList.add("out");
     setTimeout(() => { wipe.classList.remove("in", "out"); switching = false; }, 700);
   }, 640);
@@ -377,29 +503,30 @@ function openOverlay(key, idx) {
   const prev = col.photos[prevIdx];
   overlayState = { key, idx };
 
+  const pad = (n) => String(n).padStart(2, "0");
   overlay.innerHTML = `
     <div class="overlay-nav">
-      <span class="label">${col.name} / ${p.titleFlat}</span>
-      <button class="overlay-close" onclick="closeOverlay()">Close ✕</button>
+      <span class="label tech">${col.name} — ${p.titleNice}</span>
+      <button class="overlay-close tech" onclick="closeOverlay()">Close ✕</button>
     </div>
     <div class="overlay-hero">
       <div class="overlay-hero-image" id="overlay-hero-image"></div>
       <div class="overlay-hero-text">
-        <div class="overlay-num"><em>${String(idx + 1).padStart(2, "0")}</em> / ${String(total).padStart(2, "0")}</div>
-        <div class="overlay-title">${p.title.replace(/\n/g, "<br>")}</div>
-        <div class="overlay-divider"></div>
+        <div class="overlay-num tech">${frameNo(idx)} / ${pad(total)}</div>
+        <h2 class="overlay-title">${p.titleHTML}</h2>
         <p class="overlay-desc">${p.desc}</p>
-        <div class="overlay-fields">
-          <div><div class="label">Category</div><div class="overlay-field-value">${p.cat}</div></div>
-          <div><div class="label">Year</div><div class="overlay-field-value">${p.date}</div></div>
-          <div><div class="label">Location</div><div class="overlay-field-value">${p.loc}</div></div>
-        </div>
+        <dl class="facts tech">
+          <div><dt>Category</dt><dd>${p.cat}</dd></div>
+          <div><dt>Place</dt><dd>${p.loc}</dd></div>
+          <div><dt>Date</dt><dd>${p.date}</dd></div>
+          <div><dt>Collection</dt><dd>${col.name.charAt(0) + col.name.slice(1).toLowerCase()}</dd></div>
+        </dl>
       </div>
     </div>
     <div class="overlay-footer">
-      <button class="overlay-step" onclick="openOverlay('${key}', ${prevIdx})">← ${prev.titleFlat}</button>
-      <span class="overlay-count"><em>${String(idx + 1).padStart(2, "0")}</em> / ${String(total).padStart(2, "0")}</span>
-      <button class="overlay-step" onclick="openOverlay('${key}', ${nextIdx})">${next.titleFlat} →</button>
+      <button class="overlay-step" onclick="openOverlay('${key}', ${prevIdx})">← ${prev.titleNice}</button>
+      <span class="overlay-count tech">${pad(idx + 1)} / ${pad(total)}</span>
+      <button class="overlay-step" onclick="openOverlay('${key}', ${nextIdx})">${next.titleNice} →</button>
     </div>
   `;
 
@@ -491,8 +618,10 @@ window.addEventListener("scroll", () => {
 /* ─── Smooth anchors ────────────────────────────────────────────────────── */
 document.querySelectorAll('a[href^="#"]').forEach((a) =>
   a.addEventListener("click", (e) => {
+    const href = a.getAttribute("href");
     e.preventDefault();
-    document.querySelector(a.getAttribute("href"))?.scrollIntoView({ behavior: "smooth" });
+    if (href.length < 2) return;            // bare "#" (e.g. Book) is handled elsewhere
+    document.querySelector(href)?.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth" });
   })
 );
 
@@ -518,28 +647,28 @@ const photoPage = (src, pageNo) =>
 const coverPage = (col) => `
   <div class="page page-text page-cover">
     <span class="label">Ruben Van Ruysseveldt — Photographic Volume</span>
-    <h2 class="book-cover-title">${col.name}</h2>
+    <h2 class="book-cover-title">${titleCase(col.name)}</h2>
     <p class="book-cover-sub">${col.sub}</p>
-    <span class="book-cover-year">2021 — ${new Date().getFullYear()} / ${String(col.photos.length).padStart(2, "0")} Plates</span>
+    <span class="book-cover-year">2021 — ${new Date().getFullYear()} · ${String(col.photos.length).padStart(2, "0")} plates</span>
   </div>`;
 
 const detailPage = (p, idx, total, pageNo) => `
   <div class="page page-text">
     <div class="book-num">Plate ${String(idx + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}</div>
-    <h3 class="book-title">${p.title.replace(/\n/g, "<br>")}</h3>
+    <h3 class="book-title">${p.titleHTML}</h3>
     <div class="book-divider"></div>
     <p class="book-desc">${p.desc}</p>
     <div class="book-fields">
       <div><div class="label">Category</div><div class="book-field-value">${p.cat}</div></div>
-      <div><div class="label">Year</div><div class="book-field-value">${p.date}</div></div>
-      <div><div class="label">Location</div><div class="book-field-value">${p.loc}</div></div>
+      <div><div class="label">Date</div><div class="book-field-value">${p.date}</div></div>
+      <div><div class="label">Place</div><div class="book-field-value">${p.loc}</div></div>
     </div>
     <span class="book-pageno right">${pageNo}</span>
   </div>`;
 
 const endPage = () => `
   <div class="page page-text page-end">
-    <h3 class="book-title">The<br>End</h3>
+    <h3 class="book-title">The <em>end</em>.</h3>
     <div class="book-divider"></div>
     <p class="book-desc">Thank you for looking. If any of this stayed with you, find me on Instagram.</p>
     <a class="contact-email" href="https://www.instagram.com/rubenvanruysseveldt/" target="_blank" rel="noopener">@rubenvanruysseveldt</a>
@@ -673,7 +802,13 @@ function initGalleryCursor() {
 
   const cursor = document.createElement("div");
   cursor.className = "cursor-view";
-  cursor.textContent = "View";
+  cursor.setAttribute("aria-hidden", "true");
+  // autofocus brackets — the four corners lock in when you land on a photo
+  cursor.innerHTML = `
+    <svg viewBox="0 0 76 76" fill="none" stroke="currentColor" stroke-width="1">
+      <path d="M1 15V1h14M61 1h14v14M75 61v14H61M15 75H1V61"/>
+    </svg>
+    <span>View</span>`;
   document.body.appendChild(cursor);
   document.body.classList.add("has-cursor");
 
@@ -727,7 +862,36 @@ function initHeroMotion() {
 /* keep the mobile browser chrome in step with the active theme */
 function setThemeColor(key) {
   document.querySelector('meta[name="theme-color"]')
-    ?.setAttribute("content", key === "mono" ? "#0B0B0C" : "#F3F1EA");
+    ?.setAttribute("content", key === "mono" ? "#0A0A0A" : "#F1EEE7");
+}
+
+/* ─── Footer signature: set "Ruysseveldt" to exactly the page width ──────── */
+function fitFooterMark() {
+  const word = document.getElementById("footer-word");
+  if (!word) return;
+  const box = word.parentElement;
+  const cs = getComputedStyle(box);
+  const avail = box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  box.style.fontSize = "100px";
+  const w = word.getBoundingClientRect().width;
+  if (w > 0) box.style.fontSize = (100 * avail / w).toFixed(2) + "px";
+}
+
+/* ─── Intro: the roll advances to its last frame while the seal settles ──── */
+function runIntroCounter(introSkipped) {
+  const total = collections.mono.photos.length + collections.color.photos.length;
+  const totalEl = document.getElementById("intro-total");
+  const frameEl = document.getElementById("intro-frame");
+  if (totalEl) totalEl.textContent = String(total).padStart(2, "0");
+  if (introSkipped || !frameEl) return;
+  const start = performance.now() + 250, dur = 1100;
+  const step = (t) => {
+    const k = Math.min(1, Math.max(0, (t - start) / dur));
+    const eased = 1 - Math.pow(1 - k, 3);
+    frameEl.textContent = String(Math.round(eased * total)).padStart(2, "0");
+    if (k < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
 }
 
 /* ─── Local time (Belgium) in the footer ────────────────────────────────── */
@@ -747,13 +911,28 @@ document.addEventListener("DOMContentLoaded", () => {
   document.body.classList.add("mono"); // start in monochrome
   updateNav();                         // sync nav ink to the starting theme
   document.querySelectorAll(".switch-btn").forEach((btn) =>
-    btn.addEventListener("click", () => switchCollection(btn.dataset.key))
+    btn.addEventListener("click", () => switchCollection(btn.dataset.key, btn))
   );
+  // counts on the tabs + the frame total in the statement, from the data
+  document.querySelectorAll(".switch-count").forEach((el) => {
+    el.textContent = String(collections[el.dataset.count].photos.length).padStart(2, "0");
+  });
+  const framesEl = document.getElementById("fact-frames");
+  if (framesEl) framesEl.textContent = collections.mono.photos.length + collections.color.photos.length;
+
   renderWorks(current);
+  initIndex();
+  document.querySelectorAll(".view-btn[data-view]").forEach((btn) =>
+    btn.addEventListener("click", () => setView(btn.dataset.view))
+  );
+  document.getElementById("nav-index")?.addEventListener("click", () => setView("index"));
+
   observeReveal();
   initGalleryCursor();
   initHeroMotion();
   initClock();
+  fitFooterMark();
+  if (document.fonts) document.fonts.ready.then(fitFooterMark);
 
   // keep the footer copyright year current
   const yearEl = document.getElementById("year");
@@ -762,7 +941,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // choreographed first paint: hero lines rise once the intro has slid away
   const introEl = document.getElementById("intro");
   const introSkipped = !introEl || introEl.classList.contains("skip");
-  setTimeout(() => document.body.classList.add("loaded"), introSkipped ? 120 : 1500);
+  runIntroCounter(introSkipped);
+  setTimeout(() => document.body.classList.add("loaded"), introSkipped ? 120 : 1650);
 
   // back to top
   document.getElementById("back-top")?.addEventListener("click", () =>
