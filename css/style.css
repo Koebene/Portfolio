@@ -30,6 +30,7 @@
 
 /* Theme: CHROMA (light) — warm paper */
 body {
+  --paper:   #F1EEE7;
   --bg:      #F1EEE7;
   --fg:      #151513;
   --soft:    rgba(21, 21, 19, 0.78);   /* reading text */
@@ -50,6 +51,15 @@ body.mono {
   --img-filter: grayscale(100%) contrast(1.05);
 }
 
+/* Chroma breathes: hovering a colour photograph eases the paper toward that
+   photo's own hue (--amb, set by initAmbient). Only the hue moves — lightness
+   stays the paper's, so every text contrast on the page holds. With no --amb
+   the formula gives back the plain paper. The test uses the exact syntax: a
+   browser that half-understands it would otherwise drop the background. */
+@supports (color: oklch(from red 0.9495 min(c, 0.02) h)) {
+  body:not(.mono) { --bg: oklch(from var(--amb, #F1EEE7) 0.9495 min(c, 0.02) h); }
+}
+
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 
 body {
@@ -64,7 +74,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   font-optical-sizing: auto;
-  transition: background-color 0.7s var(--ease), color 0.7s var(--ease);
+  transition: background-color 1.2s var(--ease), color 0.7s var(--ease);
 }
 /* during the aperture scene change the new theme must be captured settled */
 html.switching body,
@@ -98,13 +108,13 @@ html { scrollbar-width: thin; scrollbar-color: var(--muted) transparent; }
 
 .hero-title, .manifesto-lead, .switch-btn, .about-heading, .contact-heading,
 .ix-title, .overlay-title, .overlay-step, .book-title, .book-cover-title,
-.footer-mark, .nav-word, .work-title, .wipe-name {
+.footer-mark, .nav-word, .wipe-name, .note-title, .plate-cap-title, .stage-title {
   font-family: var(--font-serif);
   font-weight: 400;
 }
 
 /* tidy line breaks where supported */
-.manifesto-body, .about-body, .contact-sub, .overlay-desc, .book-desc { text-wrap: pretty; }
+.manifesto-body, .about-body, .contact-sub, .overlay-desc, .book-desc, .note-text { text-wrap: pretty; }
 .manifesto-lead, .about-heading, .overlay-title, .book-title { text-wrap: balance; }
 
 /* ─── Accessibility ─────────────────────────────────────────────────────── */
@@ -150,7 +160,7 @@ html { scrollbar-width: thin; scrollbar-color: var(--muted) transparent; }
    View Transitions API; browsers without it get the wipe below. */
 ::view-transition-old(root),
 ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
-::view-transition-new(root) { animation: aperture 1.15s var(--ease-io) both; }
+html.switching::view-transition-new(root) { animation: aperture 1.15s var(--ease-io) both; }
 @keyframes aperture {
   from {
     clip-path: polygon(
@@ -168,6 +178,21 @@ html { scrollbar-width: thin; scrollbar-color: var(--muted) transparent; }
       calc(var(--vt-x, 50%) - 225vmax) calc(var(--vt-y, 50%) - 130vmax));
   }
 }
+
+/* Opening a photograph: the print you clicked lifts off the page and flies to
+   the stage (and back again on close) while the room fades around it. The
+   frame on the stage is sized from the photo's exact shape, so the flight
+   lands without a jump. */
+html.morphing::view-transition-new(root) { animation: vtFadeIn 0.5s ease both; }
+@keyframes vtFadeIn { from { opacity: 0; } }
+::view-transition-group(photo) {
+  animation-duration: 0.85s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+::view-transition-old(photo), ::view-transition-new(photo) { animation-duration: 0.85s; }
+html.morphing .overlay,
+html.morphing .work-item,
+html.morphing .work-item img { transition: none !important; }
 
 /* fallback scene change — full-screen panel in the target theme */
 .wipe {
@@ -265,10 +290,14 @@ body.menu-open .nav-toggle span:nth-child(2) { transform: translateY(-5px) rotat
 .hero-img img {
   /* lift her eyes into the upper half so the name can sit low, over the dark */
   object-position: 50% 78%;
-  filter: grayscale(100%) brightness(0.64) contrast(1.06);
+  /* the opening print develops: it starts pale, a latent image, and the
+     shadows come up as the intro lifts — like paper in the developer tray */
+  filter: grayscale(100%) brightness(1.8) contrast(0.34);
+  transition: filter 2.4s cubic-bezier(0.3, 0.5, 0.2, 1);
   transform: scale(1.06);
   animation: heroZoom 20s var(--ease) forwards;
 }
+body.loaded .hero-img img { filter: grayscale(100%) brightness(0.64) contrast(1.06); }
 @keyframes heroZoom { to { transform: scale(1); } }
 .hero::after {
   content: ''; position: absolute; inset: 0; pointer-events: none;
@@ -392,9 +421,69 @@ body.loaded .hero-side { opacity: 1; }
   color: var(--muted);
 }
 
-/* gallery — gap must match .works-row (main.js reads it for the layout) */
-.works { display: flex; flex-direction: column; gap: 24px; padding: 0 var(--gutter) 160px; }
-.works-row { display: flex; width: 100%; gap: 24px; }
+/* gallery — a sequence of spreads, laid out like a monograph (see sequence()
+   in main.js). Each spread is a 12-column page; the plates are placed on it
+   by the script and sized here from their own shape. */
+.works { padding: 0 var(--gutter) 176px; }
+.spread {
+  display: grid; grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: 24px; align-items: start;
+}
+.spread > * { grid-row: 1; }               /* plate and wall text share the row */
+.spread + .spread { margin-top: clamp(112px, 11vw, 208px); }
+
+.plate { min-width: 0; }
+/* a plate is as wide as its columns allow, but never taller than the screen */
+.plate-inner {
+  --maxh: 84vh;
+  width: min(var(--fill, 100%), calc(var(--maxh) * var(--ar, 1.5)));
+}
+.spread--hero .plate-inner { --maxh: 88vh; }
+.plate.align-end .plate-inner { margin-left: auto; }
+.plate.align-center .plate-inner { margin-inline: auto; }
+/* pairs hang at different heights, like prints on a wall */
+.plate.drop { margin-top: clamp(80px, 13vw, 240px); }
+.plate-img { aspect-ratio: var(--ar, 1.5); }
+
+/* the plates drift at slightly different speeds as the page scrolls — a quiet
+   depth, nothing to watch, only to feel */
+@supports (animation-timeline: view()) {
+  .plate-inner {
+    animation: drift linear both;
+    animation-timeline: view();
+    animation-range: cover;
+  }
+}
+@keyframes drift {
+  from { transform: translateY(var(--depth, 3%)); }
+  to   { transform: translateY(calc(var(--depth, 3%) * -1)); }
+}
+
+/* plate caption — set like a book's: number, title, kind and year */
+.plate-cap {
+  display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 16px; row-gap: 2px;
+  margin-top: 14px; color: var(--muted); cursor: pointer;
+}
+.plate-cap-title {
+  font-style: italic; font-size: 19px; line-height: 1.25; letter-spacing: -0.01em;
+  text-transform: none; color: var(--fg);
+}
+.plate-cap-meta { margin-left: auto; white-space: nowrap; }
+
+/* wall text facing a single print */
+.plate-note {
+  align-self: end; cursor: pointer;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 12px;
+  padding-bottom: 4px; color: var(--muted);
+}
+.note-title {
+  font-size: clamp(28px, 2.5vw, 44px); line-height: 1.04; letter-spacing: -0.02em;
+  color: var(--fg); margin-top: 4px;
+  transition: transform 0.6s var(--ease);
+}
+.plate-note:hover .note-title { font-style: italic; transform: translateX(8px); }
+.note-text { font-size: 15px; line-height: 1.7; color: var(--soft); max-width: 32ch; }
+.note-meta { margin-top: 8px; }
 
 .work-item {
   position: relative; overflow: hidden; min-width: 0;
@@ -416,31 +505,6 @@ body.loaded .hero-side { opacity: 1; }
 .work-item.in:hover img { transform: scale(1.03); }
 body.mono .work-item:hover img { filter: grayscale(60%) contrast(1.04); }
 
-/* hover caption — a single line, like a print's label */
-.work-overlay {
-  position: absolute; left: 0; right: 0; bottom: 0; z-index: 3;
-  display: flex; align-items: baseline; gap: 16px;
-  padding: 64px 20px 16px;
-  background: linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0));
-  color: #F4F2EC;
-  opacity: 0; transform: translateY(8px);
-  transition: opacity 0.5s var(--ease), transform 0.6s var(--ease);
-}
-.work-item:hover .work-overlay, .work-item:focus-visible .work-overlay { opacity: 1; transform: none; }
-.work-num { color: rgba(244, 242, 236, 0.75); }
-.work-title { font-style: italic; font-size: clamp(18px, 1.6vw, 24px); line-height: 1.1; letter-spacing: -0.01em; }
-.work-cat { margin-left: auto; color: rgba(244, 242, 236, 0.75); white-space: nowrap; }
-
-/* phones: one frame per row, captioned underneath (see renderWorks) */
-.works-row.single { flex-direction: column; align-items: flex-start; gap: 12px; }
-.work-caption {
-  display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 12px; row-gap: 4px;
-  max-width: 100%; color: var(--muted); cursor: pointer;
-}
-.work-caption-title { font-family: var(--font-serif); font-style: italic; font-size: 19px;
-  letter-spacing: -0.01em; text-transform: none; color: var(--fg); }
-.work-caption-meta { margin-left: auto; white-space: nowrap; }
-
 /* watermark — the seal, small, bottom-right of each photograph */
 .photo-mark {
   position: absolute; right: 16px; bottom: 14px; z-index: 4;
@@ -450,7 +514,7 @@ body.mono .work-item:hover img { filter: grayscale(60%) contrast(1.04); }
   transition: opacity 0.4s var(--ease);
 }
 .work-item:hover .photo-mark { opacity: 0; }
-.overlay-hero-image .photo-mark { right: 20px; bottom: 18px; width: clamp(72px, 7vw, 108px); opacity: 0.55; }
+.stage .photo-mark { right: 18px; bottom: 16px; width: clamp(60px, 5.6vw, 92px); opacity: 0.5; }
 
 /* index — the whole collection as a list of plates */
 .index { list-style: none; margin: 0 var(--gutter) 160px; border-top: 1px solid var(--line); }
@@ -551,20 +615,27 @@ body.mono .footer-seal .on-light { display: none; }
   color: var(--fg);
 }
 
-/* ─── Photo detail (overlay) ────────────────────────────────────────────── */
+/* ─── Photo view (overlay) ──────────────────────────────────────────────────
+   The photograph first, on its own stage with nothing beside it; the words
+   wait below. Left and right thirds of the stage step through the roll. */
 .overlay {
   position: fixed; inset: 0; z-index: 200;
   background: var(--bg); color: var(--fg);
   transform: translateY(100%);
   transition: transform 0.75s var(--ease);
-  overflow-y: auto;
+  overflow-y: auto; overscroll-behavior: contain;
 }
 .overlay.open { transform: translateY(0); }
+/* Chroma: the room takes on a faint cast of the photograph's own colour —
+   the hue only, at the paper's lightness, so contrast is untouched */
+@supports (color: oklch(from red 0.9495 min(c, 0.026) h)) {
+  body:not(.mono) .overlay { --bg: oklch(from var(--tone, #F1EEE7) 0.9495 min(c, 0.026) h); }
+}
 
 .overlay-nav {
   position: sticky; top: 0; z-index: 10;
   display: flex; justify-content: space-between; align-items: center;
-  padding: 20px var(--gutter); background: var(--bg); border-bottom: 1px solid var(--line);
+  height: 56px; padding: 0 var(--gutter); background: var(--bg);
 }
 .overlay-nav .label { color: var(--muted); }
 .overlay-actions { display: flex; align-items: center; gap: 32px; }
@@ -574,34 +645,50 @@ body.mono .footer-seal .on-light { display: none; }
 
 /* phones: horizontal swipes on the photo / book are ours, vertical scroll
    stays with the browser */
-.overlay-hero-image, .book { touch-action: pan-y; }
+.stage, .book { touch-action: pan-y; }
 
-.overlay-hero { display: grid; grid-template-columns: 1.4fr 1fr; min-height: calc(100vh - 73px); border-bottom: 1px solid var(--line); }
-.overlay-hero-text {
-  padding: 64px 56px; display: flex; flex-direction: column; justify-content: flex-end;
-  border-left: 1px solid var(--line);
+/* the stage — main.js sizes the frame to the photo's exact shape inside it */
+.stage {
+  position: relative;
+  height: calc(100vh - 56px); height: calc(100svh - 56px); min-height: 420px;
+  padding: 8px var(--gutter) 80px;
+  display: flex; align-items: center; justify-content: center;
 }
+.photo-frame { position: relative; flex: 0 0 auto; line-height: 0; overflow: hidden; }
+
+/* invisible halves of the roll: the cursor reads Prev / Next over them */
+.stage-zone { position: absolute; top: 0; bottom: 80px; width: 34%; z-index: 2; cursor: pointer; }
+.stage-zone.prev { left: 0; cursor: w-resize; }
+.stage-zone.next { right: 0; cursor: e-resize; }
+body.has-cursor .stage-zone { cursor: none; }
+
+.stage-caption {
+  position: absolute; left: var(--gutter); right: var(--gutter); bottom: 0; z-index: 3;
+  height: 80px; display: flex; align-items: center; gap: 24px;
+  color: var(--muted);
+}
+.stage-caption > .tech { font-variant-numeric: tabular-nums; }
+.stage-title { font-style: italic; font-size: 22px; line-height: 1.2; letter-spacing: -0.01em; color: var(--fg); }
+.stage-more { margin-left: auto; color: var(--muted); transition: color 0.25s ease; }
+.stage-more:hover { color: var(--fg); }
+
+/* the story, below the photograph */
+.story {
+  display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px;
+  padding: 144px var(--gutter) 128px;
+  border-top: 1px solid var(--line);
+}
+.story-head { grid-column: 1 / span 6; }
+.story-body { grid-column: 8 / span 5; padding-top: 32px; }
 .overlay-num { color: var(--muted); font-variant-numeric: tabular-nums; }
 .overlay-title {
-  font-size: clamp(44px, 5.2vw, 96px); line-height: 0.98; letter-spacing: -0.025em;
-  margin: 16px 0 40px;
+  font-size: clamp(44px, 5.4vw, 100px); line-height: 0.98; letter-spacing: -0.025em;
+  margin-top: 24px;
 }
-.overlay-desc { font-size: 16px; line-height: 1.75; color: var(--soft); max-width: 44ch; margin-bottom: 48px; }
-.overlay-hero-text .facts { max-width: 440px; }
+.overlay-desc { font-size: 17px; line-height: 1.75; color: var(--soft); max-width: 44ch; margin-bottom: 48px; }
+.story .facts { max-width: 440px; }
 
-/* film-roll reveal stage */
-.overlay-hero-image {
-  position: relative; overflow: hidden; background: var(--bg);
-  display: flex; align-items: center; justify-content: center;
-  padding: 40px;
-}
-/* The photo box shrink-wraps the photograph (the final image sizes it), so the
-   watermark and film frames sit on the picture, never on the band beside it. */
-.photo-frame { position: relative; display: block; line-height: 0; max-width: 100%; max-height: 100%; overflow: hidden; }
-.photo-frame .film-final {
-  position: static; display: block;
-  width: auto; height: auto; max-width: 100%; max-height: calc(100vh - 73px - 80px);
-}
+/* film-roll advance — stepping to the next photograph */
 .film-final {
   position: absolute; inset: 0; width: 100%; height: 100%;
   object-fit: contain; filter: var(--img-filter);
@@ -642,6 +729,7 @@ body.mono .footer-seal .on-light { display: none; }
 .overlay-footer {
   display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap;
   padding: 32px var(--gutter);
+  border-top: 1px solid var(--line);
 }
 .overlay-step {
   font-size: clamp(22px, 2.6vw, 40px); line-height: 1.05; letter-spacing: -0.02em;
@@ -658,7 +746,7 @@ body.mono .footer-seal .on-light { display: none; }
 
 /* ─── Cursor: autofocus brackets over the photographs ───────────────────── */
 .cursor-view {
-  position: fixed; left: 0; top: 0; z-index: 150; pointer-events: none;
+  position: fixed; left: 0; top: 0; z-index: 250; pointer-events: none;   /* above the photo view */
   width: 76px; height: 76px; margin: -38px 0 0 -38px;
   color: #fff; mix-blend-mode: difference;
   opacity: 0; transform: scale(1.5);
@@ -751,14 +839,17 @@ body.mono .book-spread::after { background: linear-gradient(90deg, transparent, 
   html { scroll-behavior: auto; }
   #intro { animation-delay: 0.4s; }
   .grain, .safelight, .hero-scroll .line::after { animation: none; }
-  .hero-img img { animation: none; transform: none; }
+  .hero-img img { animation: none; transform: none; transition: none;
+    filter: grayscale(100%) brightness(0.64) contrast(1.06); }
   .line-in, .hero-caption, .hero-bottom, .hero-side { transform: none; opacity: 1; transition: none; }
   .hero-side { transform: translateY(-50%); }
   .work-item { opacity: 1; clip-path: none; transition: none; }
   .work-item img { transform: none; }
+  .plate-inner { animation: none; }
   .reveal { opacity: 1; transform: none; transition: none; }
   .wipe { display: none; }
-  ::view-transition-new(root) { animation: none; }
+  body { transition: none; }
+  html.switching::view-transition-new(root) { animation: none; }
 }
 
 /* ─── Laptop ───────────────────────────────────────────────────────────── */
@@ -767,7 +858,9 @@ body.mono .book-spread::after { background: linear-gradient(90deg, transparent, 
   .ix-loc { display: none; }
   .manifesto-body { grid-column: 1 / span 6; }
   .manifesto .facts { grid-column: 8 / span 5; }
-  .overlay-hero-text { padding: 48px 40px; }
+  .note-text { font-size: 14px; }
+  .story-head { grid-column: 1 / span 7; }
+  .story-body { grid-column: 8 / span 5; }
 }
 
 /* ─── Phone & small tablet ─────────────────────────────────────────────── */
@@ -818,8 +911,18 @@ body.mono .book-spread::after { background: linear-gradient(90deg, transparent, 
   .views { padding-bottom: 0; }
   .work-sub { margin-bottom: 32px; }
   .work-sub .works-count { display: none; }
-  .works { gap: 48px; padding-bottom: 112px; }
-  .work-overlay { display: none; }
+
+  /* one column: landscapes run edge to edge, portraits sit inset and swap
+     sides from one to the next */
+  .works { padding-bottom: 112px; }
+  .spread { display: block; }
+  .spread + .spread { margin-top: 72px; }
+  .spread--m-full .plate-inner { width: auto; margin-inline: calc(var(--gutter) * -1); }
+  .spread--m-full .plate-cap { padding-inline: var(--gutter); }
+  .spread--m-inset-l .plate-inner, .spread--m-inset-r .plate-inner { --fill: 84%; }
+  .spread--m-inset-r .plate-inner { margin-left: auto; }
+  .plate-cap { margin-top: 12px; column-gap: 12px; }
+  .plate-cap-title { font-size: 18px; }
 
   .index { margin: 0 var(--gutter); }
   .index-row { grid-template-columns: 64px minmax(0, 1fr) auto; column-gap: 16px; align-items: center; padding: 14px 0; }
@@ -844,10 +947,14 @@ body.mono .book-spread::after { background: linear-gradient(90deg, transparent, 
   .overlay-nav .label { display: none; }
   .overlay-actions { width: 100%; justify-content: space-between; }
 
-  .overlay-hero { grid-template-columns: 1fr; min-height: auto; }
-  .overlay-hero-image { padding: 0; }
-  .photo-frame .film-final { max-height: 72vh; }
-  .overlay-hero-text { border-left: none; padding: 40px var(--gutter) 48px; }
+  /* the photo full width under the bar; swipe to step, the story follows */
+  .stage { height: auto; min-height: 0; padding: 0; display: block; }
+  .photo-frame { margin-inline: auto; }
+  .stage-zone, .stage-caption { display: none; }
+  .story { display: block; padding: 40px var(--gutter) 56px; border-top: 0; }
+  .story-body { padding-top: 32px; }
+  .overlay-title { font-size: clamp(40px, 11vw, 64px); margin-top: 16px; }
+  .overlay-desc { font-size: 16px; }
   .overlay-footer { padding: 24px var(--gutter) 40px; }
 
   .book-stage { gap: 12px; padding: 0 10px; }

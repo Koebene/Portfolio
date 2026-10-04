@@ -10,11 +10,14 @@ Run this after adding new photos to /images:
 
 It writes:
   images/<name>-800.jpeg, images/<name>-1600.jpeg   (only when smaller than the source)
-  js/image-variants.js                              (which sizes exist, for main.js)
+  js/image-variants.js   which sizes exist (imageVariants), each photo's exact
+                         shape (imageRatios) and a characteristic colour
+                         (imageTones, used to tint the Chroma pages)
 
 Photos without an entry in the manifest simply load normally, so the site never
 breaks if this script has not been run yet.
 """
+import colorsys
 import json
 import os
 import re
@@ -38,8 +41,30 @@ def is_skipped(name):
     return name.lower().startswith("share")
 
 
+def tone(im):
+    """The colour that characterises a photo: of its main colours, the one that
+    is both fairly saturated and covers a real part of the frame (a plain
+    average turns most colour photos into mud)."""
+    s = im.copy()
+    s.thumbnail((80, 80))
+    q = s.quantize(colors=8, method=Image.Quantize.MEDIANCUT)
+    pal, total = q.getpalette(), s.size[0] * s.size[1]
+    best, score = None, -1.0
+    for count, idx in q.getcolors():
+        r, g, b = pal[idx * 3: idx * 3 + 3]
+        _, light, sat = colorsys.rgb_to_hls(r / 255, g / 255, b / 255)
+        if light < 0.12 or light > 0.92:
+            continue
+        sc = (count / total) * (0.25 + sat)
+        if sc > score:
+            best, score = (r, g, b), sc
+    if best is None:
+        best = s.resize((1, 1), Image.LANCZOS).getpixel((0, 0))
+    return "#%02x%02x%02x" % best
+
+
 def main():
-    manifest = {}
+    manifest, ratios, tones = {}, {}, {}
     made = skipped = 0
 
     for fn in sorted(os.listdir(IMG_DIR)):
@@ -52,6 +77,8 @@ def main():
             im.load()
             w, h = im.size
             im = im.convert("RGB")
+            ratios[rel] = round(w / h, 4)
+            tones[rel] = tone(im)
 
             candidates = []
             for target in WIDTHS:
@@ -80,6 +107,12 @@ def main():
                 "   the smallest file that still looks sharp on the visitor's screen. */\n")
         f.write("window.imageVariants = ")
         json.dump(manifest, f, indent=0, ensure_ascii=False)
+        f.write(";\n")
+        f.write("window.imageRatios = ")       # exact width ÷ height of each master
+        json.dump(ratios, f, ensure_ascii=False)
+        f.write(";\n")
+        f.write("window.imageTones = ")        # characteristic colour of each photo
+        json.dump(tones, f, ensure_ascii=False)
         f.write(";\n")
 
     total = sum(os.path.getsize(os.path.join(IMG_DIR, f))

@@ -59,8 +59,12 @@ function normalizeCollections() {
 }
 const frameNo = (i) => "N° " + String(i + 1).padStart(2, "0");
 
-/* Aspect ratio (width / height): use the photo's `ar`, else 1. */
+/* Aspect ratio (width / height): the exact shape measured from the file by
+   tools/build-image-variants.py when available (stored `ar` values can be
+   estimates — First Weather was 12% off), else the stored `ar`, else 1. */
 function getAR(p) {
+  const real = window.imageRatios && window.imageRatios[p.src];
+  if (real > 0) return real;
   return p.ar && p.ar > 0 ? p.ar : 1;
 }
 
@@ -83,8 +87,8 @@ function imgAttrs(src, sizes) {
   return set ? ` srcset="${set}" sizes="${sizes}"` : "";
 }
 
-const SIZES_GRID    = "(max-width: 820px) 100vw, 50vw";
-const SIZES_OVERLAY = "(max-width: 820px) 100vw, 55vw";
+const SIZES_GRID    = "(max-width: 820px) 100vw, 75vw";
+const SIZES_OVERLAY = "(max-width: 820px) 100vw, 92vw";
 const SIZES_BOOK    = "(max-width: 820px) 94vw, min(590px, 46vw)";
 
 /* Seeded RNG (mulberry32) — deterministic "randomness" so the arrangement
@@ -108,7 +112,7 @@ function shuffle(arr, rand) {
 }
 
 /* A fresh hang on every visit: each collection's photos are shuffled and the
-   row-height rhythm is re-seeded once at load, then held for the rest of the
+   sequence of spreads is re-seeded once at load, then held for the rest of the
    session — so resizing or switching collections never reshuffles the wall
    under the visitor, but a reload always gives a different arrangement. */
 function shuffleCollections() {
@@ -117,50 +121,64 @@ function shuffleCollections() {
   });
 }
 
-/* Group items into rows of varying height — a justified gallery that leaves
-   room around each photo. Taller target heights mean fewer, larger photos per
-   row; `gap` is the breathing space between them (and is kept out of the maths
-   so rows still line up edge to edge within the padded container). */
-function buildRows(items, W, seed, gap, single) {
-  // Phones: one photo per row at full width, so every frame reads at a real
-  // size instead of as a narrow two-up tile. Very tall frames are capped to
-  // most of the screen height so one photo never needs more than a scroll.
-  if (single) {
-    const cap = window.innerHeight * 0.82;
-    return items.map((it) => {
-      const h = Math.min(W / it._ar, cap);
-      return { items: [it], h, w: h * it._ar, single: true };
-    });
-  }
+/* ─── The sequence: the gallery paced like a photo book ─────────────────────
+   Not a wall of equal tiles but spreads, the way a monograph is laid out: a
+   large plate, a print with a line of wall text facing it, a pair hung at
+   different heights. The spread is chosen from each photo's shape and a seed
+   per visit — so any photo added later finds its place, and every visit hangs
+   a little differently. Phones: one column, alternating insets. */
+const kindOf = (p) => (p._ar >= 1.15 ? "L" : p._ar <= 0.92 ? "P" : "S");
 
-  const rand = mulberry32(seed);
-  const minH = 500;
-  const maxH = 760;
+// placement on the 12-column grid: [grid-column, alignment inside it]
+const SPREADS = {
+  hero:       { plates: [["1 / 13", "center"]] },
+  "single-r": { plates: [["4 / 13", "end"]],   note: "1 / 4" },
+  "single-l": { plates: [["1 / 10", "start"]], note: "10 / 13" },
+  "port-r":   { plates: [["7 / 13", "end"]],   note: "3 / 7" },
+  "port-l":   { plates: [["1 / 7", "start"]],  note: "7 / 11" },
+  "pair-pp":  { plates: [["1 / 6", "start"], ["7 / 12", "start"]], drop: 1 },
+  "pair-pl":  { plates: [["2 / 6", "start"], ["7 / 13", "start"]], drop: 0 },
+  "pair-lp":  { plates: [["1 / 8", "start"], ["9 / 13", "end"]],   drop: 1 },
+};
 
-  const rows = [];
-  let row = [], arSum = 0;
-  let target = minH + rand() * (maxH - minH);
-
-  const rowHeight = (n, sum) => (W - gap * (n - 1)) / sum;
-
-  items.forEach((it) => {
-    row.push(it);
-    arSum += it._ar;
-    if (rowHeight(row.length, arSum) <= target) {
-      rows.push({ items: row, h: rowHeight(row.length, arSum) });
-      row = []; arSum = 0;
-      target = minH + rand() * (maxH - minH);
+function sequence(photos, rand, mobile) {
+  const out = [];
+  let i = 0, side = rand() < 0.5 ? 1 : 0, sinceHero = 3, last = "";
+  while (i < photos.length) {
+    const a = photos[i], b = photos[i + 1];
+    const ka = kindOf(a), kb = b ? kindOf(b) : null;
+    if (mobile) {
+      out.push({ type: ka === "L" ? "m-full" : side ? "m-inset-r" : "m-inset-l", items: [a] });
+      if (ka !== "L") side ^= 1;
+      i++;
+      continue;
     }
-  });
-  if (row.length) rows.push({ items: row, h: Math.min(rowHeight(row.length, arSum), maxH) });
-  return rows;
+    const canPair = b && !last.startsWith("pair") && rand() < 0.55;
+    let type;
+    if (ka === "L" && sinceHero >= 3 && rand() < 0.45) type = "hero";
+    else if (canPair && ka !== "L" && kb !== "L") type = "pair-pp";
+    else if (canPair && ka !== "L" && kb === "L") type = "pair-pl";
+    else if (canPair && ka === "L" && kb !== "L") type = "pair-lp";
+    else if (ka === "L") type = side ? "single-r" : "single-l";
+    else type = side ? "port-r" : "port-l";
+    const items = type.startsWith("pair") ? [a, b] : [a];
+    out.push({ type, items });
+    i += items.length;
+    side ^= 1;
+    last = type;
+    sinceHero = type === "hero" ? 0 : sinceHero + 1;
+  }
+  return out;
 }
+
+const firstSentence = (s) => ((s || "").match(/^.*?[.!?](?=\s|$)/) || [s || ""])[0].trim();
+const yearOf = (d) => String(d).replace(/^.*?(\d{4}).*$/, "$1");
 
 /* Same breakpoint as the CSS: at or below it the gallery is a single column. */
 const SINGLE_COLUMN = window.matchMedia("(max-width: 820px)");
 
-/* Re-seeded per page load (see shuffleCollections) so the row rhythm changes
-   too — but read from here on every re-render, so resizes stay consistent. */
+/* Re-seeded per page load (see shuffleCollections) so the spreads change too —
+   but read from here on every re-render, so resizes stay consistent. */
 const SEED = {
   mono:  (Math.random() * 1e9) | 0,
   color: (Math.random() * 1e9) | 0,
@@ -174,86 +192,85 @@ const workIO = new IntersectionObserver(
   { threshold: 0.12, rootMargin: "0px 0px -6% 0px" }
 );
 
-/* ─── Render Works (justified layout) ───────────────────────────────────── */
+/* ─── Render the sequence ───────────────────────────────────────────────── */
+let galleryMode = null;   // "desk" | "mob" — the layout only changes across the breakpoint
 function renderWorks(key) {
   const col = collections[key];
   const grid = document.querySelector(".works");
   grid.innerHTML = "";
-
   col.photos.forEach((p) => (p._ar = getAR(p)));
 
-  // Inner content width (excluding the section's side padding) + the gap that
-  // separates photos, both read from CSS so layout + styling stay in sync.
-  const cs = getComputedStyle(grid);
-  const padL = parseFloat(cs.paddingLeft) || 0;
-  const padR = parseFloat(cs.paddingRight) || 0;
-  const GAP = parseFloat(cs.rowGap) || 16;
-  const W = (grid.clientWidth || window.innerWidth) - padL - padR;
-  const single = SINGLE_COLUMN.matches;
-  const rows = buildRows(col.photos, W, SEED[key], GAP, single);
-  const total = String(col.photos.length).padStart(2, "0");
+  const mobile = SINGLE_COLUMN.matches;
+  galleryMode = mobile ? "mob" : "desk";
+  const rand = mulberry32(SEED[key]);       // same seed → same hang for this visit
 
-  rows.forEach((r) => {
-    const rowEl = document.createElement("div");
-    rowEl.className = "works-row" + (r.single ? " single" : "");
-    if (!r.single) rowEl.style.height = r.h + "px";
+  sequence(col.photos, rand, mobile).forEach((s) => {
+    const conf = SPREADS[s.type];
+    const spread = document.createElement("div");
+    spread.className = `spread spread--${s.type}`;
 
-    r.items.forEach((p, ci) => {
+    s.items.forEach((p, n) => {
       const i = col.photos.indexOf(p);
-      const item = document.createElement("div");
-      item.className = "work-item";
-      if (r.single) {
-        item.style.flex = "none";
-        item.style.width = r.w + "px";
-        item.style.height = r.h + "px";
-      } else {
-        item.style.flexGrow = p._ar;          // width proportional to aspect ratio
-        item.style.flexBasis = "0";
+      const open = (e) => openOverlay(key, i, e && e.currentTarget.closest(".plate")?.querySelector(".plate-img"));
+      const fig = document.createElement("figure");
+      fig.className = "plate";
+      if (conf) {
+        fig.style.gridColumn = conf.plates[n][0];
+        fig.classList.add("align-" + conf.plates[n][1]);
+        if (conf.drop === n) fig.classList.add("drop");
       }
-      item.style.transitionDelay = ci * 90 + "ms"; // stagger within the row
-      // expose each photo as a real, keyboard-operable control
-      item.setAttribute("role", "button");
-      item.setAttribute("tabindex", "0");
-      item.setAttribute("aria-label", `${p.titleFlat} — ${p.cat}, ${p.date}. Open photograph.`);
-      item.innerHTML = `
-        <img src="${p.src}"${imgAttrs(p.src, SIZES_GRID)} alt="" loading="lazy" decoding="async">
-        <img class="photo-mark" src="images/logo-watermark.svg" alt="" loading="lazy">
-        <div class="work-overlay" aria-hidden="true">
-          <span class="work-num tech">${frameNo(i)}</span>
-          <span class="work-title">${p.titleNice}</span>
-          <span class="work-cat tech">${p.cat} — ${p.date}</span>
-        </div>
-      `;
-      const openThis = () => openOverlay(key, i);
-      item.addEventListener("click", openThis);
-      item.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openThis(); }
+      fig.style.setProperty("--ar", p._ar.toFixed(4));
+      fig.style.setProperty("--depth", (2 + rand() * 4).toFixed(1) + "%");   // parallax amount
+      const caption = conf && conf.note ? "" : `
+          <figcaption class="plate-cap tech" aria-hidden="true">
+            <span class="plate-cap-num">${frameNo(i)}</span>
+            <span class="plate-cap-title">${p.titleNice}</span>
+            <span class="plate-cap-meta">${p.cat} — ${yearOf(p.date)}</span>
+          </figcaption>`;
+      fig.innerHTML = `
+        <div class="plate-inner">
+          <div class="plate-img work-item" role="button" tabindex="0"
+               aria-label="${p.titleFlat} — ${p.cat}, ${p.date}. Open photograph.">
+            <img src="${p.src}"${imgAttrs(p.src, SIZES_GRID)} alt="" loading="lazy" decoding="async">
+            <img class="photo-mark" src="images/logo-watermark.svg" alt="" loading="lazy">
+          </div>${caption}
+        </div>`;
+      const btn = fig.querySelector(".work-item");
+      btn.dataset.idx = i;
+      btn.style.transitionDelay = n * 140 + "ms";
+      btn.addEventListener("click", open);
+      btn.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(e); }
       });
-      rowEl.appendChild(item);
-      if (REDUCED) item.classList.add("in");
-      else workIO.observe(item);
-
-      // Phones get a quiet caption under the photo instead of text printed on
-      // top of it (there is no hover to reveal it). The photo button already
-      // carries the same information for screen readers.
-      if (r.single) {
-        const cap = document.createElement("div");
-        cap.className = "work-caption tech";
-        cap.setAttribute("aria-hidden", "true");
-        cap.style.width = r.w + "px";
-        cap.innerHTML = `
-          <span class="work-caption-num">${frameNo(i)}</span>
-          <span class="work-caption-title">${p.titleNice}</span>
-          <span class="work-caption-meta">${p.cat} — ${p.date}</span>`;
-        cap.addEventListener("click", openThis);
-        rowEl.appendChild(cap);
-      }
+      fig.querySelector(".plate-cap")?.addEventListener("click", open);
+      fig.dataset.tone = (window.imageTones && window.imageTones[p.src]) || "";
+      spread.appendChild(fig);
+      if (REDUCED) btn.classList.add("in");
+      else workIO.observe(btn);
     });
 
-    grid.appendChild(rowEl);
+    // a single print gets wall text on the facing columns, like a book page
+    if (conf && conf.note) {
+      const p = s.items[0];
+      const i = col.photos.indexOf(p);
+      const note = document.createElement("div");
+      note.className = "plate-note reveal";
+      note.style.gridColumn = conf.note;
+      note.setAttribute("aria-hidden", "true");
+      note.dataset.tone = (window.imageTones && window.imageTones[p.src]) || "";
+      note.innerHTML = `
+        <span class="tech">${frameNo(i)}</span>
+        <p class="note-title">${p.titleNice}</p>
+        <p class="note-text">${firstSentence(p.desc)}</p>
+        <span class="tech note-meta">${p.cat} · ${p.loc} · ${yearOf(p.date)}</span>`;
+      note.addEventListener("click", () => openOverlay(key, i, spread.querySelector(".plate-img")));
+      spread.appendChild(note);
+      observer.observe(note);
+    }
+    grid.appendChild(spread);
   });
 
-  document.querySelector(".works-count").textContent = `${total} frames`;
+  document.querySelector(".works-count").textContent = `${String(col.photos.length).padStart(2, "0")} frames`;
   document.getElementById("work-sub").textContent = col.sub;
 }
 
@@ -269,6 +286,7 @@ function renderIndex(key) {
     const thumb = (window.imageVariants && window.imageVariants[p.src]) ? window.imageVariants[p.src][0][1] : p.src;
     return `
     <li class="index-row" role="button" tabindex="0" data-i="${i}" data-thumb="${thumb}"
+        data-tone="${(window.imageTones && window.imageTones[p.src]) || ""}"
         aria-label="${p.titleFlat} — ${p.cat}, ${p.loc}, ${p.date}. Open photograph.">
       <img class="ix-thumb" src="${thumb}" alt="" loading="lazy" decoding="async">
       <span class="ix-num tech">${frameNo(i)}</span>
@@ -297,7 +315,11 @@ function setView(next) {
 
 function initIndex() {
   const list = document.querySelector(".index");
-  const open = (row) => openOverlay(current, +row.dataset.i);
+  // fly from what's on screen: the floating preview (desktop) or the row's thumbnail (phone)
+  const open = (row) => {
+    const preview = document.querySelector(".index-preview.show");
+    openOverlay(current, +row.dataset.i, preview || row.querySelector(".ix-thumb"));
+  };
   list.addEventListener("click", (e) => { const row = e.target.closest(".index-row"); if (row) open(row); });
   list.addEventListener("keydown", (e) => {
     const row = e.target.closest(".index-row");
@@ -347,12 +369,15 @@ function initIndex() {
   });
 }
 
-/* Re-layout on resize (debounced) so rows always stay edge-to-edge. */
+/* Resize (debounced): re-sequence only across the phone breakpoint, keep the
+   photo stage fitted, refit the footer signature. */
 let resizeTimer;
 window.addEventListener("resize", () => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => {
-    if (view === "gallery") renderWorks(current);
+    // the spreads are CSS-sized; only crossing the phone breakpoint re-sequences
+    if (view === "gallery" && galleryMode !== (SINGLE_COLUMN.matches ? "mob" : "desk")) renderWorks(current);
+    sizeStageFrame();
     const h = document.querySelector(".hero");
     heroThreshold = (h ? h.offsetHeight : window.innerHeight) - 70;
     fitFooterMark();
@@ -367,6 +392,7 @@ let switching = false;
 
 function applyCollection(key) {
   document.body.classList.toggle("mono", key === "mono");
+  document.body.style.removeProperty("--amb");   // a Chroma tint never carries over
   document.querySelectorAll(".switch-btn").forEach((btn) => {
     const on = btn.dataset.key === key;
     btn.classList.toggle("active", on);
@@ -566,7 +592,56 @@ const overlay = document.getElementById("overlay");
 let overlayState = null;       // { key, idx } while the overlay is open
 let overlayReturnFocus = null; // element to refocus when it closes
 
-function openOverlay(key, idx) {
+/* The stage frame is sized from the photo's exact shape (not from the loaded
+   file), so it is right before any pixels arrive — needed for the flight in. */
+function sizeStageFrame() {
+  const stage = overlay.querySelector(".stage");
+  const frame = overlay.querySelector(".photo-frame");
+  if (!stage || !frame || !overlayState) return;
+  const ar = getAR(collections[overlayState.key].photos[overlayState.idx]);
+  const cs = getComputedStyle(stage);
+  const W = stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  const H = SINGLE_COLUMN.matches
+    ? window.innerHeight * 0.72
+    : stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+  let w = W, h = w / ar;
+  if (h > H) { h = H; w = h * ar; }
+  frame.style.width = Math.round(w) + "px";
+  frame.style.height = Math.round(h) + "px";
+}
+
+/* After the flight (which reuses the small gallery file), swap in the sharp
+   version for the stage — decoded first, so the swap is invisible. */
+function upgradeStageImage(src) {
+  const img = overlay.querySelector(".film-final");
+  if (!img) return;
+  const set = imgSrcset(src);
+  if (!set) { img.src = src; return; }
+  const pre = new Image();
+  pre.sizes = SIZES_OVERLAY; pre.srcset = set; pre.src = src;
+  pre.decode().then(() => {
+    if (img.isConnected) { img.sizes = SIZES_OVERLAY; img.srcset = set; }
+  }).catch(() => {});
+}
+
+const inView = (el) => {
+  if (!el) return false;
+  const r = el.getBoundingClientRect();
+  return r.width > 0 && r.bottom > 0 && r.top < window.innerHeight && r.right > 0 && r.left < window.innerWidth;
+};
+
+/* where a photo lives on the page right now (to fly back to), if anywhere */
+function photoHome(key, idx) {
+  if (key !== current) return null;
+  if (view === "gallery") return document.querySelector(`.works .plate-img[data-idx="${idx}"]`);
+  return document.querySelector(`.index-row[data-i="${idx}"] .ix-thumb`);
+}
+
+/* The photo view. The photograph comes first — a full-screen stage, the story
+   below it. Opened from the page, the picture flies from where it was clicked
+   onto the stage (View Transitions); stepping to the next photo keeps the
+   film-roll advance instead: the roll moving on to the next frame. */
+function openOverlay(key, idx, sourceEl) {
   const col = collections[key];
   const p = col.photos[idx];
   if (!p) return;
@@ -588,52 +663,101 @@ function openOverlay(key, idx) {
   }
   document.title = `${p.titleNice} — ${BASE_TITLE}`;
 
-  const pad = (n) => String(n).padStart(2, "0");
-  overlay.innerHTML = `
-    <div class="overlay-nav">
-      <span class="label tech">${col.name} — ${p.titleNice}</span>
-      <div class="overlay-actions">
-        <button class="overlay-share tech" onclick="sharePhoto(this)">Share</button>
-        <button class="overlay-close tech" onclick="closeOverlay()">Close ✕</button>
-      </div>
-    </div>
-    <div class="overlay-hero">
-      <div class="overlay-hero-image" id="overlay-hero-image"></div>
-      <div class="overlay-hero-text">
-        <div class="overlay-num tech">${frameNo(idx)} / ${pad(total)}</div>
-        <h2 class="overlay-title">${p.titleHTML}</h2>
-        <p class="overlay-desc">${p.desc}</p>
-        <dl class="facts tech">
-          <div><dt>Category</dt><dd>${p.cat}</dd></div>
-          <div><dt>Place</dt><dd>${p.loc}</dd></div>
-          <div><dt>Date</dt><dd>${p.date}</dd></div>
-          <div><dt>Collection</dt><dd>${col.name.charAt(0) + col.name.slice(1).toLowerCase()}</dd></div>
-        </dl>
-      </div>
-    </div>
-    <div class="overlay-footer">
-      <button class="overlay-step" onclick="openOverlay('${key}', ${prevIdx})">← ${prev.titleNice}</button>
-      <span class="overlay-count tech">${pad(idx + 1)} / ${pad(total)}</span>
-      <button class="overlay-step" onclick="openOverlay('${key}', ${nextIdx})">${next.titleNice} →</button>
-    </div>
-  `;
+  const srcImg = sourceEl && (sourceEl.tagName === "IMG" ? sourceEl : sourceEl.querySelector("img"));
+  const fly = !wasOpen && !REDUCED && !!document.startViewTransition && inView(sourceEl) &&
+              srcImg && srcImg.complete && srcImg.naturalWidth > 0;
 
-  // Build inside a frame that shrink-wraps the photograph, so the watermark
-  // always sits on the picture and never on the letterbox band beside it.
-  const heroImageEl = document.getElementById("overlay-hero-image");
-  const frame = document.createElement("div");
-  frame.className = "photo-frame";
-  heroImageEl.appendChild(frame);
-  buildFilmReveal(frame, p.src);
-  frame.insertAdjacentHTML("beforeend",
-    '<img class="photo-mark" src="images/logo-watermark.svg" alt="">');
-  overlay.scrollTop = 0;
-  overlay.setAttribute("aria-hidden", "false");
-  if (!wasOpen) setChromeInert(true);
-  document.body.style.overflow = "hidden";
+  const pad = (n) => String(n).padStart(2, "0");
+  const collName = titleCase(col.name);
+  const build = () => {
+    overlay.innerHTML = `
+      <div class="overlay-nav">
+        <span class="label tech">${collName} — ${p.titleNice}</span>
+        <div class="overlay-actions">
+          <button class="overlay-share tech" onclick="sharePhoto(this)">Share</button>
+          <button class="overlay-close tech" onclick="closeOverlay()">Close ✕</button>
+        </div>
+      </div>
+      <section class="stage">
+        <div class="photo-frame"></div>
+        <button class="stage-zone prev" data-label="Prev" tabindex="-1" aria-hidden="true" onclick="openOverlay('${key}', ${prevIdx})"></button>
+        <button class="stage-zone next" data-label="Next" tabindex="-1" aria-hidden="true" onclick="openOverlay('${key}', ${nextIdx})"></button>
+        <div class="stage-caption">
+          <span class="tech">${frameNo(idx)} / ${pad(total)}</span>
+          <span class="stage-title">${p.titleNice}</span>
+          <button class="stage-more tech" onclick="this.closest('.overlay').querySelector('.story').scrollIntoView({behavior:'smooth'})">Story ↓</button>
+        </div>
+      </section>
+      <section class="story">
+        <div class="story-head">
+          <span class="tech overlay-num">${frameNo(idx)} / ${pad(total)} — ${collName}</span>
+          <h2 class="overlay-title">${p.titleHTML}</h2>
+        </div>
+        <div class="story-body">
+          <p class="overlay-desc">${p.desc}</p>
+          <dl class="facts tech">
+            <div><dt>Category</dt><dd>${p.cat}</dd></div>
+            <div><dt>Place</dt><dd>${p.loc}</dd></div>
+            <div><dt>Date</dt><dd>${p.date}</dd></div>
+            <div><dt>Collection</dt><dd>${collName}</dd></div>
+          </dl>
+        </div>
+      </section>
+      <div class="overlay-footer">
+        <button class="overlay-step" onclick="openOverlay('${key}', ${prevIdx})">← ${prev.titleNice}</button>
+        <span class="overlay-count tech">${pad(idx + 1)} / ${pad(total)}</span>
+        <button class="overlay-step" onclick="openOverlay('${key}', ${nextIdx})">${next.titleNice} →</button>
+      </div>`;
+    // Chroma: the page takes on a faint tint of the photograph's own colour
+    const tone = window.imageTones && window.imageTones[p.src];
+    if (tone) overlay.style.setProperty("--tone", tone);
+    else overlay.style.removeProperty("--tone");
+    const frame = overlay.querySelector(".photo-frame");
+    sizeStageFrame();
+    let finalImg = null;
+    if (fly) {
+      // land on the very file already on screen, then sharpen after the flight
+      finalImg = document.createElement("img");
+      finalImg.className = "film-final show";
+      finalImg.alt = "";
+      finalImg.src = srcImg.currentSrc || srcImg.src;
+      frame.appendChild(finalImg);
+      frame.style.viewTransitionName = "photo";
+    } else {
+      buildFilmReveal(frame, p.src);
+    }
+    frame.insertAdjacentHTML("beforeend", '<img class="photo-mark" src="images/logo-watermark.svg" alt="">');
+    overlay.scrollTop = 0;
+    overlay.setAttribute("aria-hidden", "false");
+    if (!wasOpen) setChromeInert(true);
+    document.body.style.overflow = "hidden";
+    return finalImg;
+  };
+
+  if (fly) {
+    const root = document.documentElement;
+    root.classList.add("morphing");
+    sourceEl.style.viewTransitionName = "photo";
+    const t = document.startViewTransition(async () => {
+      sourceEl.style.viewTransitionName = "";
+      const img = build();
+      overlay.classList.add("open");
+      try { await img.decode(); } catch (e) { /* show it anyway */ }
+    });
+    t.finished.finally(() => {
+      root.classList.remove("morphing");
+      const frame = overlay.querySelector(".photo-frame");
+      if (frame) frame.style.viewTransitionName = "";
+      upgradeStageImage(p.src);
+      overlay.querySelector(".overlay-close")?.focus({ preventScroll: true });
+    });
+    return;
+  }
+
+  build();
   requestAnimationFrame(() => {
     overlay.classList.add("open");
-    overlay.querySelector(".overlay-close")?.focus();
+    overlay.querySelector(".overlay-close")?.focus({ preventScroll: true });
   });
 }
 
@@ -642,15 +766,35 @@ function closeOverlay(fromHistory) {
   // Opening pushed a history entry: step back over it, so "forward" can reopen
   // the photo. The popstate handler then calls us again to do the closing.
   if (fromHistory !== true && history.state && history.state.photo) { history.back(); return; }
-  overlay.classList.remove("open");
-  overlay.setAttribute("aria-hidden", "true");
-  overlayState = null;
-  document.body.style.overflow = "";
-  setChromeInert(false);
-  if (overlayReturnFocus && overlayReturnFocus.focus) overlayReturnFocus.focus();
-  overlayReturnFocus = null;
-  if (location.hash.startsWith("#/")) history.replaceState(null, "", baseURL());
-  document.title = BASE_TITLE;
+
+  const finish = () => {
+    overlay.classList.remove("open");
+    overlay.setAttribute("aria-hidden", "true");
+    overlayState = null;
+    document.body.style.overflow = "";
+    setChromeInert(false);
+    if (overlayReturnFocus && overlayReturnFocus.focus) overlayReturnFocus.focus({ preventScroll: true });
+    overlayReturnFocus = null;
+    if (location.hash.startsWith("#/")) history.replaceState(null, "", baseURL());
+    document.title = BASE_TITLE;
+  };
+
+  // fly the photograph back to its place on the page, if that place is in view
+  const home = overlayState && photoHome(overlayState.key, overlayState.idx);
+  const frame = overlay.querySelector(".photo-frame");
+  if (!REDUCED && document.startViewTransition && frame && inView(home) && overlay.scrollTop < 80) {
+    const root = document.documentElement;
+    root.classList.add("morphing");
+    frame.style.viewTransitionName = "photo";
+    const t = document.startViewTransition(() => {
+      frame.style.viewTransitionName = "";
+      home.style.viewTransitionName = "photo";
+      finish();
+    });
+    t.finished.finally(() => { home.style.viewTransitionName = ""; root.classList.remove("morphing"); });
+    return;
+  }
+  finish();
 }
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") { closeOverlay(); return; }
@@ -920,15 +1064,89 @@ function initGalleryCursor() {
     });
   });
 
+  const label = cursor.querySelector("span");
   const grid = document.querySelector(".works");
   grid.addEventListener("mouseover", (e) => {
-    if (e.target.closest(".work-item")) cursor.classList.add("show");
+    if (e.target.closest(".work-item")) { label.textContent = "View"; cursor.classList.add("show"); }
   });
   grid.addEventListener("mouseout", (e) => {
     if (!e.relatedTarget || !e.relatedTarget.closest(".work-item")) cursor.classList.remove("show");
   });
-  // never linger when an overlay/book opens
-  document.addEventListener("click", () => cursor.classList.remove("show"));
+  // on the photo stage the brackets read Prev / Next over the left and right thirds
+  overlay.addEventListener("mouseover", (e) => {
+    const zone = e.target.closest(".stage-zone");
+    if (zone) { label.textContent = zone.dataset.label; cursor.classList.add("show"); }
+    else cursor.classList.remove("show");
+  });
+  overlay.addEventListener("mouseleave", () => cursor.classList.remove("show"));
+  // never linger on the page when a photo or the book opens
+  document.addEventListener("click", (e) => { if (!e.target.closest(".stage-zone")) cursor.classList.remove("show"); });
+}
+
+/* ─── The statement develops as you read it ─────────────────────────────────
+   Each word starts as a faint latent image and comes up to full ink as the
+   line scrolls through the screen — a print developing in the tray. */
+function initDeveloping() {
+  const el = document.querySelector(".manifesto-lead");
+  if (!el || REDUCED) return;
+  const wrap = (node) => {
+    [...node.childNodes].forEach((n) => {
+      if (n.nodeType === Node.TEXT_NODE) {
+        const frag = document.createDocumentFragment();
+        n.textContent.split(/(\s+)/).forEach((part) => {
+          if (!part) return;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+          const w = document.createElement("span");
+          w.className = "w";
+          w.textContent = part;
+          frag.appendChild(w);
+        });
+        n.replaceWith(frag);
+      } else if (n.nodeType === Node.ELEMENT_NODE) {
+        wrap(n);
+      }
+    });
+  };
+  wrap(el);
+  const words = [...el.querySelectorAll(".w")];
+  const n = words.length;
+  let raf = null;
+  const update = () => {
+    raf = null;
+    const r = el.getBoundingClientRect(), vh = window.innerHeight;
+    // 0 as the line enters the lower part of the screen, 1 once it's well up
+    const p = Math.min(1, Math.max(0, (vh * 0.9 - r.top) / (vh * 0.5 + r.height * 0.6)));
+    words.forEach((w, i) => {
+      const t = Math.min(1, Math.max(0, (p * (n + 1.5) - i) / 1.5));
+      w.style.opacity = (0.12 + 0.88 * t).toFixed(3);
+    });
+  };
+  window.addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(update); }, { passive: true });
+  window.addEventListener("resize", update);
+  update();
+}
+
+/* ─── Chroma: the paper takes on the colour of what you look at ─────────────
+   Hovering a photograph in the colour collection eases the page toward a faint
+   tint of that photo's own colour (measured by the image script). Monochrome
+   stays a true darkroom. */
+function initAmbient() {
+  let timer = null;
+  const setTone = (tone) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      if (tone && !document.body.classList.contains("mono")) document.body.style.setProperty("--amb", tone);
+      else document.body.style.removeProperty("--amb");
+    }, tone ? 160 : 450);
+  };
+  [document.querySelector(".works"), document.querySelector(".index")].forEach((area) => {
+    if (!area) return;
+    area.addEventListener("mouseover", (e) => {
+      const el = e.target.closest("[data-tone]");
+      if (el && el.dataset.tone) setTone(el.dataset.tone);
+    });
+    area.addEventListener("mouseleave", () => setTone(null));
+  });
 }
 
 /* ─── Hero motion: content drifts up & fades as you scroll past it ──────── */
@@ -1000,7 +1218,7 @@ function initSwipe() {
     openOverlay(overlayState.key, (overlayState.idx + d + n) % n);
   };
   addSwipe(overlay, {
-    within: ".overlay-hero-image",
+    within: ".stage",
     onNext: () => step(1),
     onPrev: () => step(-1),
     follow: (dx, release) => {
@@ -1079,6 +1297,8 @@ document.addEventListener("DOMContentLoaded", () => {
   observeReveal();
   initGalleryCursor();
   initHeroMotion();
+  initDeveloping();
+  initAmbient();
   initClock();
   fitFooterMark();
   if (document.fonts) document.fonts.ready.then(fitFooterMark);
