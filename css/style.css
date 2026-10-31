@@ -685,7 +685,8 @@ body.has-cursor .stage-zone { cursor: none; }
   font-size: clamp(44px, 5.4vw, 100px); line-height: 0.98; letter-spacing: -0.025em;
   margin-top: 24px;
 }
-.overlay-desc { font-size: 17px; line-height: 1.75; color: var(--soft); max-width: 44ch; margin-bottom: 48px; }
+.overlay-desc { font-size: 17px; line-height: 1.75; color: var(--soft); max-width: 44ch; margin-bottom: 48px;
+  white-space: pre-line; }   /* the texts are poems: keep their line and stanza breaks */
 .story .facts { max-width: 440px; }
 
 /* film-roll advance — stepping to the next photograph */

@@ -171,7 +171,11 @@ function sequence(photos, rand, mobile) {
   return out;
 }
 
-const firstSentence = (s) => ((s || "").match(/^.*?[.!?](?=\s|$)/) || [s || ""])[0].trim();
+// the texts are written as verse; the wall text runs the first sentence on as one line
+const firstSentence = (s) => {
+  const t = (s || "").replace(/\s+/g, " ").trim();
+  return (t.match(/^.*?[.!?](?=\s|$)/) || [t])[0];
+};
 const yearOf = (d) => String(d).replace(/^.*?(\d{4}).*$/, "$1");
 
 /* Same breakpoint as the CSS: at or below it the gallery is a single column. */
