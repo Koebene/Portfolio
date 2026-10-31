@@ -581,7 +581,9 @@ window.addEventListener("popstate", () => {
 async function sharePhoto(btn) {
   if (!overlayState) return;
   const p = collections[overlayState.key].photos[overlayState.idx];
-  const url = location.href;
+  // the photo's own page (tools/share_pages.py), so link previews show the
+  // photograph itself — apps never read the "#/…" part of an address
+  const url = `${location.origin}/${COLL_SLUG[overlayState.key]}/${p.slug}`;
   const title = `${p.titleNice} — Ruben Van Ruysseveldt`;
   try {
     if (navigator.share) { await navigator.share({ title, url }); return; }

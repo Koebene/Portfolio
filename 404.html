@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ruben Van Ruysseveldt — Photography</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <!-- Served for any address that doesn't exist. A photo or book address
+       without its own page (e.g. a photo added before tools/share_pages.py
+       ran) still lands on the right photo; anything else goes home. -->
+  <script>
+    var m = /^\/(monochrome|chroma|book)\/([a-z0-9-]+)\/?$/.exec(location.pathname);
+    location.replace(m ? "/#/" + m[1] + "/" + m[2] : "/");
+  </script>
+  <style>
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center;
+      background: #0A0A0A; color: #ECEAE4; font: 17px/1.6 Georgia, serif; }
+    a { color: inherit; }
+  </style>
+</head>
+<body>
+  <p><a href="/">Ruben Van Ruysseveldt — Photography</a></p>
+</body>
+</html>

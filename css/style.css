@@ -958,12 +958,23 @@ body.mono .book-spread::after { background: linear-gradient(90deg, transparent, 
   .overlay-desc { font-size: 16px; }
   .overlay-footer { padding: 24px var(--gutter) 40px; }
 
-  .book-stage { gap: 12px; padding: 0 10px; }
-  .book-arrow { width: 42px; height: 42px; }
-  .book { width: 94vw; aspect-ratio: 3 / 4; max-height: 72vh; perspective: none; }
+  /* the book takes the whole screen — picture above, words below — and the
+     arrows step down beside the page counter instead of squeezing the page */
+  .book-stage { padding: 0 var(--gutter); }
+  .book-arrow { position: fixed; bottom: 7px; z-index: 2; width: 42px; height: 42px; }
+  .book-arrow.prev { left: var(--gutter); }
+  .book-arrow.next { right: var(--gutter); }
+  .book { width: 100%; height: 100%; aspect-ratio: auto; max-height: none; perspective: none; }
   .book-spread { flex-direction: column; transition: opacity 0.3s ease; }
   .book-spread::after { display: none; }
-  .page { width: 100%; height: 50%; }
-  .page-text { justify-content: flex-start; padding: 28px 26px; }
+  .page { width: 100%; height: auto; flex: 1 1 0; min-height: 0; }
+  .page-photo { flex: 0 0 42%; }
+  .page-text { justify-content: flex-start; padding: 24px 22px 40px; overflow-y: auto; }
+  .book-num { margin-bottom: 10px; }
+  .book-title { font-size: 30px; margin-bottom: 16px; }
+  .book-divider { display: none; }
+  .book-desc { margin-bottom: 20px; }
+  /* tap zones only over the picture, so the words can scroll on small phones */
+  .book-zone { height: 42%; }
   .flip { display: none; }
 }

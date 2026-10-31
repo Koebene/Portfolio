@@ -13,6 +13,7 @@ It writes:
   js/image-variants.js   which sizes exist (imageVariants), each photo's exact
                          shape (imageRatios) and a characteristic colour
                          (imageTones, used to tint the Chroma pages)
+  monochrome/…, chroma/… a shareable page per photo (see share_pages.py)
 
 Photos without an entry in the manifest simply load normally, so the site never
 breaks if this script has not been run yet.
@@ -120,6 +121,10 @@ def main():
     print(f"variants written: {made} new, {skipped} already present")
     print(f"photos with variants: {len(manifest)}")
     print(f"images/ total now: {total/1048576:.1f} MB")
+
+    # and a shareable page + preview card per photo (see share_pages.py)
+    import share_pages
+    print(f"share pages written: {share_pages.build()}")
 
 
 if __name__ == "__main__":
