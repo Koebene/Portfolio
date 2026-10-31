@@ -40,7 +40,7 @@ window.collections = {
         cat:   "Portrait",
         loc:   "Home",
         ar:    0.82,
-        desc:  "Before the words arrive,\nthe weather does.\n\nA brow gathers like cloud over water;\nsomething in her is raining\nthat has no name yet.\n\nOne day she will know what to call it.\nWill it ever again\nbe felt this whole?",
+        desc:  "don't smile it away.\ni'm not being difficult,\ni'm being honest\nwith the only face i have.\n\nthe mud is from today.\nthe storm is from somewhere\ni don't have words for yet.\n\njust stay\nuntil it clears.",
       },
       {
         title: "STILL\nWATERS",
@@ -49,7 +49,7 @@ window.collections = {
         cat:   "Architecture",
         loc:   "Ruisbroek, BE",
         ar:    0.97,
-        desc:  "The mill no longer grinds.\nIt stands, and is doubled.\n\nA century of grain passed through here\nand the water kept none of it —\nonly the shape, upside down,\nwithout weight.\n\nWhat is left of a life's work\nwhen the work is over?\nPerhaps this:\na likeness that asks for nothing.",
+        desc:  "i used to grind wheat into bread.\nnow people live where the grain was,\nand the balconies face the water.\n\nnobody asked me\nif i wanted to change.\n\nturns out\nyou can still be a home\nlong after you stop being\nwhat they built you for.",
       },
       {
         title: "CHAPEL IN\nTHE MIST",
@@ -58,7 +58,7 @@ window.collections = {
         cat:   "Landscape",
         loc:   "Belgium",
         ar:    0.78,
-        desc:  "The forest is forgetting its edges.\nOnly the chapel keeps its outline,\npale as a held breath.\n\nSomeone carried these stones here.\nSomeone climbed these steps\nwith a question too heavy for home.\n\nThe fog does not answer.\nIt never has.\nAnd still, the door is there.",
+        desc:  "the fog has taken the forest,\nthe path, the far side of the water.\nit hasn't taken me.\n\ni'm not here for the clear days.\ni'm here for the ones\nwhen you can't see a thing\nand come anyway.",
       },
       {
         title: "MIRROR\nWORLD",
@@ -67,7 +67,7 @@ window.collections = {
         cat:   "Abstract",
         loc:   "Belgium",
         ar:    0.63,
-        desc:  "Here the tree grows downward\ninto a sky made of water,\nand for a moment you believe it.\n\nOnly the fallen leaves give it away,\nadrift on the surface of the dream.\n\nHow much of what we see is reflection —\nand how would we ever know,\nif nothing came floating by?",
+        desc:  "i'm the tree you see\nwhen you look down.\n\nsame branches, same leaves,\nonly upside down, and quieter.\n\nmost people never notice me\nuntil a leaf lands\nand makes me tremble.\n\nwe all have a version of ourselves\nthat only shows\nwhen everything goes still.",
       },
       {
         title: "CITY\nLINES",
@@ -76,7 +76,7 @@ window.collections = {
         cat:   "Street",
         loc:   "Ghent, BE",
         ar:    1.78,
-        desc:  "Wires above, rails below —\nthe city, drawn in lines\nthat all lead to the same old tower.\n\nBetween them strangers cross,\neach the centre of a world\nthe others walk straight through.\n\nA thousand journeys\nover the same worn stones,\nand not one of them repeated.",
+        desc:  "i'm made of lines —\nrails, wires, the routes you take\nwithout thinking.\n\nevery day you pass a hundred strangers\non my stones.\n\none of them\nis going to matter.\nyou just don't know\nwhich one yet.",
       },
       {
         title: "FIRST\nSLEEP",
@@ -85,7 +85,7 @@ window.collections = {
         cat:   "Family",
         loc:   "Home",
         ar:    1.0,
-        desc:  "So new\nthe world has asked for nothing yet.\n\nWrapped, watched over from every side,\nbreathing the slow tide of first days.\n\nWe spend the rest of our lives\nlooking for the way back\nto a trust this complete.\n\nSome of us call it home.",
+        desc:  "we hang above you like small moons,\na woolly lamb\nand soft things with no names yet.\n\nyou don't know what we are.\nyou don't need to.\n\njust know\nthat every time you open your eyes,\nsomething that loves you\nwill be looking back.",
       },
       {
         title: "LOW\nTIDE",
@@ -94,7 +94,7 @@ window.collections = {
         cat:   "Landscape",
         loc:   "Wadden Sea, NL",
         ar:    0.58,
-        desc:  "Down at the level of the planks\neverything leans toward the boat —\nrope, shadow, the grain of the wood.\n\nThe boat waits.\nThe jetty waits.\nThe sea comes back when it comes back.\n\nThere is a kind of faith\nin things that are made to wait:\nthey never ask how long.",
+        desc:  "the water left,\nand i stayed exactly where it found me.\n\nthat's what i'm for:\nto hold still\nfor the things that drift.\n\nit always comes back.\nnot because i asked —\nbecause it knows\nwhere i am.",
       },
       {
         title: "HOUSE\nLIGHTS",
@@ -103,7 +103,7 @@ window.collections = {
         cat:   "Documentary",
         loc:   "Ghent, BE",
         ar:    1.33,
-        desc:  "Under the chandeliers,\na hundred conversations\nand not one of them about you.\n\nThere is a mercy in that —\nto sit alone among others,\nheld by the murmur like warm water,\nunseen, and not lonely.\n\nEvery city needs one room\nwhere no one is expected\nand everyone belongs.",
+        desc:  "i've heard every kind of conversation —\nfirst dates, last drinks,\nthe ones that end in silence.\n\ni never tell.\n\npull up a stool.\nyou don't have to talk.\nsome rooms are just\nfor not being alone.",
       },
       {
         title: "LAST\nTRAIN",
@@ -112,7 +112,7 @@ window.collections = {
         cat:   "Night",
         loc:   "Belgium",
         ar:    0.85,
-        desc:  "The stairs go down into a pool of light\nand nobody goes with them.\n\nPlatforms one and two,\nthe cold, the hum of the lamps —\na place built for leaving,\nleft.\n\nWho was the last to stand here tonight,\nand did they get\nwhere they were going?",
+        desc:  "everyone who comes down these stairs\nis in a hurry to leave me.\n\ni don't mind.\ni was built for goodbyes.\n\nbut if you missed yours tonight,\nstand here a while.\nthe next one is always coming,\neven when it doesn't feel like it.",
       },
       {
         title: "SHOES IN\nTHE SKY",
@@ -121,7 +121,7 @@ window.collections = {
         cat:   "Festival",
         loc:   "Belgium",
         ar:    1.33,
-        desc:  "Hundreds of pairs hang above the crowd,\nlaced to the sky\nby people who walked home barefoot.\n\nEach one a dare, a summer,\na night someone decided\nto leave a piece of themselves behind\nand keep on dancing.\n\nWhat would you throw up there\nto prove that you were here?",
+        desc:  "we were thrown up here\nat the end of someone's best summer.\n\nwe'll never walk again.\nwe don't mind.\n\nwe got to see\nwhat joy looks like from above:\na crowd that forgot,\nfor one whole afternoon,\nto be careful.",
       },
       {
         title: "TWO\nCHAIRS",
@@ -130,7 +130,7 @@ window.collections = {
         cat:   "Still Life",
         loc:   "Ardèche, FR",
         ar:    1.39,
-        desc:  "Two chairs beneath the olive tree,\nturned a little toward each other,\nas if the talk had only paused.\n\nNo one is here.\nStill, the shade remembers\nthe weight of an afternoon,\nthe laughter gone up into the leaves.\n\nAn empty chair is never empty.\nIt keeps the shape\nof whoever it is waiting for.",
+        desc:  "we've been facing each other\nall afternoon,\nwaiting for the two of you.\n\nwe don't need much.\na little shade,\na table small enough\nthat your knees touch.\n\ncome back before the light goes.\nwe'll keep your places.",
       },
       {
         title: "ALL NEW\nSOUNDS",
@@ -139,7 +139,7 @@ window.collections = {
         cat:   "Street",
         loc:   "Ardèche, FR",
         ar:    0.66,
-        desc:  "A stranger walks away from me\nwith a promise on his back:\nall new sounds.\n\nThe wall behind him burns to white.\nThe street hears nothing new at all.\n\nMaybe that's how it is with promises —\nwe carry them out into the light,\nwhere everyone can read them\nbut us.",
+        desc:  "you wear me on your back,\nso you're the only one\nwho can't read me.\n\nvisions of all new sounds —\nthe street sees it,\nthe light sees it.\n\nthe best things about you\nare often written\nwhere you can't see them.\nthat's what the people\nwalking behind you are for.",
       },
       {
         title: "LOOK\nUP",
@@ -148,7 +148,7 @@ window.collections = {
         cat:   "Family",
         loc:   "Nieuwpoort, BE",
         ar:    0.66,
-        desc:  "One arm straight up,\nmouth open on a word not finished,\nthe small body leaning after a finger.\n\nThere — look —\na gull, a cormorant, a cloud with a face;\nit hardly matters what.\n\nChildren don't keep wonder to themselves.\nWhen did we learn to?",
+        desc:  "look — no, up, higher!\nthere, see it?\n\nyou keep looking at me.\ni keep pointing at the sky.\n\none day i'll stop\ntelling you everything i see.\nso please,\nwhile i still do,\nlook where i'm pointing.",
       },
 
     ],
@@ -167,7 +167,7 @@ window.collections = {
         cat:   "Landscape",
         loc:   "Spain",
         ar:    0.75,
-        desc:  "One figure at the edge of the stone,\nand all that sky.\n\nHere the mind goes where eyes can't —\nout past the horizon,\nand comes back carrying nothing,\nlighter for it.\n\nWe climb this high\nto feel how small we are.\nWhy is that such a relief?",
+        desc:  "they climb me\nwhen the world gets too loud,\nstand on my back\nand let the sky do the talking.\n\ni don't say a word.\ni never have.\n\nmost of the time\nthat's exactly\nwhat they came for.",
       },
       {
         title: "HIDDEN\nCOVE",
@@ -176,7 +176,7 @@ window.collections = {
         cat:   "Landscape",
         loc:   "Costa Brava, ES",
         ar:    1.0,
-        desc:  "In the cove the sea forgets to move.\nOne boat, anchored in a blue\nthat seems to have been invented here.\n\nPine above, pale stone below,\nthe water so clear\nthe hull seems to rest on light.\n\nCut the engine.\nSome places only open\nto those who stop.",
+        desc:  "i'm not on the way to anywhere.\nyou have to mean to find me.\n\none boat,\nwater so clear it hides nothing,\ncliffs that hide everything else.\n\nmaybe that's the trick:\nbe clear with the one who finds you,\nand quiet with the rest of the world.",
       },
       {
         title: "AGAINST\nTHE WIND",
@@ -185,7 +185,7 @@ window.collections = {
         cat:   "Family",
         loc:   "Zeeland, NL",
         ar:    0.71,
-        desc:  "A small hand, a length of string,\nand a whole sky pulling the other way.\n\nThis is how it begins:\nthe first negotiation\nwith something larger than yourself.\n\nHold too tight and it falls.\nLet go and it is gone.\nSomewhere between the two,\nit flies.",
+        desc:  "you think you're holding me.\nyou are.\n\nbut here's what you don't know yet:\ni only fly\nbecause you pull back.\n\nthe ones who love you\ndon't let you drift.\nthey hold on\njust enough\nfor you to rise.",
       },
       {
         title: "THE\nCROSSING",
@@ -194,7 +194,7 @@ window.collections = {
         cat:   "Travel",
         loc:   "Wadden Sea, NL",
         ar:    0.56,
-        desc:  "Plank after plank,\nthe rope worn soft by every hand\nthat steadied itself here,\nand at the end, open water.\n\nEvery pier is a sentence\nthat stops before it is finished,\nleaving the last word to the sea.\n\nHow far would you walk\non something built\nonly to bring you to the edge?",
+        desc:  "every hand that crossed here\nheld on to me a little.\n\nlook how soft i've worn.\nlook how i sag\nwhere they needed me most.\n\nthat isn't damage.\nthat's what being leaned on\nlooks like.",
       },
       {
         title: "FADED\nGRANDEUR",
@@ -203,7 +203,7 @@ window.collections = {
         cat:   "Architecture",
         loc:   "Belgium",
         ar:    1.52,
-        desc:  "The turrets still hold their pose,\ndoubled in the dark water,\nthe reeds closing in like slow applause.\n\nAutumn takes everything gently —\ncolour first, then certainty.\n\nGrandeur was only ever borrowed,\nand time\nis a patient lender.",
+        desc:  "every autumn the trees around me\ngive everything away\nand call it beautiful.\n\ni used to think\ngrandeur meant keeping.\n\nthen i watched them\nburn gold\non their way to letting go.",
       },
       {
         title: "UNDER\nTHE ARCHES",
@@ -212,7 +212,7 @@ window.collections = {
         cat:   "Travel",
         loc:   "Lisbon, PT",
         ar:    0.64,
-        desc:  "Arch after arch after arch,\nthe same shape repeating like a held note,\nand at the end of it, light.\n\nOne figure walks the length of it,\nsmall inside the rhythm,\nkeeping time without knowing.\n\nDo we move through the corridor —\nor is it moving through us?",
+        desc:  "i'm a hundred arches\nsaying the same thing over and over:\nkeep going.\n\nyou don't hear us.\nyou don't need to.\nyou're already walking toward the light\nlike you know something.\n\nmaybe that's what love is, too —\nthe same small shelter,\nrepeated,\nuntil you're through.",
       },
       {
         title: "BASS IN\nTHE PINES",
@@ -221,7 +221,7 @@ window.collections = {
         cat:   "Festival",
         loc:   "Belgium",
         ar:    0.56,
-        desc:  "A wall of speakers under the pines,\nthe bass rearranging the air.\n\nSkin, heat, dust —\nthe trees stand very still\nwhile everything else moves.\n\nFor a few hours, no one is a stranger.\nIs that what the old rituals were for:\na rhythm loud enough\nto quiet the self?",
+        desc:  "i'm the loudest thing in this forest,\nand still the trees were here first.\n\ni don't ask anyone to dance.\ni just shake the air\nuntil the shy ones forget themselves.\n\nthat's all most of us need:\nsomething loud enough\nto drown out\nthe voice that says don't.",
       },
       {
         title: "HOME\nCOURT",
@@ -230,7 +230,7 @@ window.collections = {
         cat:   "Travel",
         loc:   "Belgian Coast",
         ar:    0.75,
-        desc:  "Two hoops face each other on the sand —\nno ball, no players, no score.\n\nThe day burns out over the sea\nas it has a thousand times before,\nas it will a thousand more.\n\nWho won the last game here?\nThe tide took the answer\nand left the evening in its place.",
+        desc:  "my net is torn,\nthe last game ended years ago,\nand every evening\nthe sky still shows up for me.\n\nnobody keeps score here anymore.\n\nmaybe that's when a place\nbecomes home:\nwhen it's loved\nfor no reason at all.",
       },
       {
         title: "INTO THE\nWHITE",
@@ -239,7 +239,7 @@ window.collections = {
         cat:   "Landscape",
         loc:   "Belgium",
         ar:    0.75,
-        desc:  "Four figures walk into a morning\nthat has erased the horizon.\n\nThe frost keeps their footprints.\nThe fog keeps everything else.\n\nWe never see where the path goes,\nonly the next step —\nand somehow, together,\nthat has always been enough.",
+        desc:  "i took the horizon from them,\nthe trees, the edges, the plan.\n\nthey kept walking anyway,\nclose enough to hear each other.\n\ni can hide where you're going.\ni can't hide\nwho you're going with.",
       },
       {
         title: "UNDER\nGLASS",
@@ -248,7 +248,7 @@ window.collections = {
         cat:   "Botanical",
         loc:   "Meise, BE",
         ar:    0.81,
-        desc:  "Under a cathedral of glass\nthe lilies open their great green hands\nand hold up a summer\nthat isn't due for months.\n\nWe build whole climates\nto keep a little wildness close.\n\nIs this tenderness, or a cage?\nAsk the lilies.\nThey seem to have made their peace.",
+        desc:  "outside it's grey.\nin here, someone keeps it summer for me.\n\ni didn't choose this glass.\ni'm learning to love it anyway.\n\nsome of us bloom in the wild.\nsome of us bloom\nbecause somebody\nkept the heat on.",
       },
       {
         title: "HARVEST\nLIGHT",
@@ -257,7 +257,7 @@ window.collections = {
         cat:   "Landscape",
         loc:   "Belgium",
         ar:    1.57,
-        desc:  "One ear of wheat stands sharp\nagainst a sun already letting go.\n\nBehind it the whole field softens\ninto the colour of endings.\n\nRipeness is a moment, not a place.\nBy the time you notice it,\nit is already being gathered.",
+        desc:  "the sun is going down\nand i'm still green.\n\neveryone around me\nis in a hurry to turn gold.\n\nnot me.\ni'll ripen when i'm ready.\nthe light comes back tomorrow,\nand so will i.",
       },
       {
         title: "THE LONG\nFURROW",
@@ -266,7 +266,7 @@ window.collections = {
         cat:   "Landscape",
         loc:   "Ardèche, FR",
         ar:    1.61,
-        desc:  "The harvest is in.\nOne furrow runs straight to the hills\nlike a thought followed to its end.\n\nThe stubble holds the last of the light.\nThe land exhales.\n\nRest is not the opposite of work.\nIt is the field remembering\nwhat it is for.",
+        desc:  "they took everything i grew this year.\ni let them.\ngiving was the whole idea.\n\nnow there's just one long line\nrunning to the hills,\nand quiet.\n\ndon't feel sorry for an empty field.\nit isn't over.\nit's resting\nwith its arms open.",
       },
       {
         title: "THE GREEN\nCLOAK",
@@ -275,7 +275,7 @@ window.collections = {
         cat:   "Botanical",
         loc:   "Ardèche, FR",
         ar:    0.66,
-        desc:  "Leaf over leaf, year over year,\nthe ivy writes itself across the bark\nuntil the tree is mostly rumour.\n\nNothing here is in a hurry,\nand nothing here is lost —\nonly turning into ground\nfor the next living thing.\n\nIs that an ending,\nor the oldest kind of generosity?",
+        desc:  "i didn't ask the tree for permission.\ni just held on,\nleaf by leaf,\nyear by year.\n\nit never pushed me away.\n\nthat's the kind of love i trust:\nnot a moment,\na slow green yes\nthat keeps on growing.",
       },
       {
         title: "MOSS AND\nSTONE",
@@ -284,7 +284,7 @@ window.collections = {
         cat:   "Landscape",
         loc:   "Ardèche, FR",
         ar:    1.50,
-        desc:  "Every boulder wears a coat of moss\nso thick you forget it is stone.\n\nThe water argues with none of them.\nIt finds the gaps,\nthe light finds the water,\nand the whole ravine hums.\n\nSoftness, given time,\noutlasts what is hard.\nThe river has always known.",
+        desc:  "i was hard once.\nsharp at the edges,\ncold all the way through.\n\nthen the water kept passing,\nand the moss kept staying,\nand now\ni'm soft enough to rest on.\n\nit wasn't one thing that changed me.\nit was everything that stayed gentle.",
       },
       {
         title: "THE\nVISITOR",
@@ -293,7 +293,7 @@ window.collections = {
         cat:   "Nature",
         loc:   "Ardèche, FR",
         ar:    1.50,
-        desc:  "Up close the flower stops being a flower\nand becomes a world —\na thousand spirals turning inward\nunder a hard blue sky.\n\nSomewhere in the middle, a bee,\nindifferent to the mathematics,\nfollowing only the sweetness.\n\nPerhaps that is the wiser way:\nnot to understand the pattern,\nonly to find what feeds you in it.",
+        desc:  "i spent all summer\nturning toward the sun,\nbuilding a thousand perfect spirals.\n\nyou don't care about any of it.\nyou just land\nright in the middle of me\nand take what's sweet.\n\nhonestly,\nthat's the kindest thing\nanyone's done for me all year.",
       },
       {
         title: "SEA\nLEVEL",
@@ -302,7 +302,7 @@ window.collections = {
         cat:   "Seascape",
         loc:   "Nieuwpoort, BE",
         ar:    1.50,
-        desc:  "A pier ruled straight across the world,\nthe sea below, the sky above,\nin almost the same blue.\n\nNumbered posts. A red lifebuoy. One lamp.\nOrder, the way we like it.\n\nThen a cormorant crosses\non business of its own,\nand the whole picture remembers\nit is alive.",
+        desc:  "the pier keeps its line,\npost after numbered post,\none lifebuoy, one lamp.\n\ni don't.\ni cross wherever the wind lets me.\n\nyou can respect a straight line\nand still\nnot walk it.",
       },
       {
         title: "FAIR\nWIND",
@@ -311,7 +311,7 @@ window.collections = {
         cat:   "Seascape",
         loc:   "Nieuwpoort, BE",
         ar:    1.58,
-        desc:  "At the pier's end a small lighthouse\nkeeps its one promise to the sea.\n\nA sailboat comes in under a single sail,\na flag at the stern,\nfaces turned to the sun.\n\nOne thing made to stay,\none thing made to leave —\neach of them, somehow,\nthe reason for the other.",
+        desc:  "i don't chase the boats.\ni never have.\n\ni just stay lit\nat the end of the pier,\nso whoever's out there\nknows the way back.\n\nsome love sails.\nsome love waits with the light on.\nboth of them\nbring you home.",
       },
 
     ],
